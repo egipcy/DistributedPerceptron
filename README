@@ -1,0 +1,24 @@
+Distributed Perceptron
+
+Given a file containing training datas, it builds 2 types of connected node:
+* master: inside a ring architecture.
+* worker: at extremities of a star architecture.
+
+In chronological order:
+1 it reads the given file to extract values and labels.
+2 it builds masters and workers with unique ids.
+3 masters elect a president among themselves.
+4 the president splits training datas and shares them to workers.
+5 the president initializes a weights matrix randomly.
+6 the president shares that matrix to workers.
+7 workers compute gradients according to datas owned.
+8 workers give gradients to the president.
+9 the president updates the weights matrix.
+10 go to 6.
+11 from time to time, the president shares its matrix with the other masters.
+
+In case of failure:
+* the president crashes/get killed: masters elect a new president among themselves and shares it with other nodes.
+* a worker crashes/get killed: the president gives the worker's datas to other workers.
+* the old president comes back from the dead: no longer the president, ask for updated matrix.
+* a worker comes back from the dead: the president gives it datas and matrix.
