@@ -3,7 +3,10 @@
 class Matrix
 {
 public:
-  Matrix(int rows, int columns, bool random = false, double init_value = 0);
+  Matrix() = delete;
+  Matrix(int rows, int columns, double init_value = 0);
+
+  void randomize();
 
   int rows() const;
   int columns() const;
