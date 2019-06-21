@@ -1,13 +1,14 @@
 #pragma once
 
+#include "matrix.hh"
+
 class Worker
 {
 public:
   Worker(int id, std::vector<int> ids_masters, std::vector<int> ids_workers);
 
   void start();
-
-  bool has_ended() const;
+  bool run();
 
   bool is_awake() const;
   void awake();
@@ -17,10 +18,19 @@ private:
   int id_;
   std::vector<int> ids_masters_;
   std::vector<int> ids_workers_;
-  std::pair<std::vector<std::vector<double>>, std::vector<double>> datas_;
 
-  bool ended_;
   bool awake_;
 
-  void update_president();
+  int president_id_;
+  int get_president() const;
+
+  std::pair<Matrix, std::vector<double>> datas_;
+  std::pair<Matrix, std::vector<double>> get_datas() const;
+
+  std::vector<Matrix> weights_;
+  std::vector<Matrix> get_weights() const;
+
+  std::vector<Matrix> gradients_;
+  std::vector<Matrix> compute_gradients() const;
+  void broadcast_gradients() const;
 };

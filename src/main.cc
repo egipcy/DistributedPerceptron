@@ -12,22 +12,22 @@ int print_usage_and_exit()
   return 0;
 }
 
-std::pair<std::vector<std::vector<double>>, std::vector<double>>
+std::pair<Matrix, std::vector<double>>
 read_file(std::string filename)
 {
   /* TODO:
   ** open file
   ** for each line, split separators (,;)
-  ** n-1 first values goes in X (vector of vector)
+  ** n-1 first values goes in X (matrix aka vector of vectors)
   ** last value goes in y (vector)
   */
 
-  return std::pair<std::vector<std::vector<double>>, std::vector<double>>();
+  return std::pair<Matrix, std::vector<double>>();
 }
 
 std::pair<std::vector<Master>, std::vector<Worker>>
 build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
-  std::pair<std::vector<std::vector<double>>, std::vector<double>> datas)
+  std::pair<Matrix, std::vector<double>> datas)
 {
   // Init ids
   std::vector<int> ids_masters;
@@ -45,12 +45,6 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
     masters.emplace_back(ids_masters[i], ids_masters, ids_workers, nb_epochs, datas);
   for (auto i = 0; i < nb_workers; i++)
     workers.emplace_back(ids_workers[i], ids_masters, ids_workers);
-
-  // Start everybody
-  for (auto& m : masters)
-    m.start();
-  for (auto& w : workers)
-    w.start();
 
   return std::pair<>(masters, workers);
 }
@@ -74,15 +68,24 @@ int main(int argc, char** argv)
   auto masters = pair.first;
   auto workers = pair.second;
 
+  // Start everybody
+  for (auto& m: masters)
+    m.start();
+  for (auto& w: workers)
+    w.start();
+
   bool loop = true;
   while (loop)
   {
-    for (auto& m : masters)
-      if (m.has_ended())
+    for (auto& m: masters)
+      if (!m.run())
       {
         loop = false;
         break;
       }
+      
+    for (auto& w: workers)
+      w.run();
 
     // Killing loop
     /* TODO

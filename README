@@ -1,5 +1,10 @@
 Distributed Perceptron
 
+Reference:
+  Asynchronous Stochastic Gradient Descent with Delay Compensation for Distributed Deep Learning
+  Shuxin Zheng, Qi Meng, Taifeng Wang, Wei Chen, Nenghai Yu, Zhi-Ming Ma, Tie-Yan Liu
+  2016
+
 Given a file containing training datas, it builds 2 types of connected node:
 * master: inside a ring architecture.
 * worker: at extremities of a star architecture.
