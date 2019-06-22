@@ -1,8 +1,12 @@
-#pragma once
-
 #include <ctime>
+#include <cstdlib>
+#include <cassert>
+
+#include "matrix.hh"
 
 Matrix::Matrix(int rows, int columns, double init_value)
+  : rows_(rows)
+  , columns_(columns)
 {
   for (int i = 0; i < rows; i++)
     mat_.emplace_back(columns, init_value);
@@ -123,7 +127,7 @@ Matrix Matrix::dot(const Matrix& other) const
     for (int j = 0; j < other.columns(); j++)
     {
       int s = 0;
-      for (int k = 0; k < columns())
+      for (int k = 0; k < columns(); k++)
         s += mat_[i][k] * other[k][j];
       ret[i][j] = s;
     }
@@ -131,7 +135,7 @@ Matrix Matrix::dot(const Matrix& other) const
   return ret;
 }
 
-Matrix Matrix::map(const double (*func) (double)&) const
+Matrix Matrix::map(double (*func) (double)) const
 {
   Matrix ret(*this);
 

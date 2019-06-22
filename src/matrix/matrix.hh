@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 class Matrix
 {
 public:
@@ -26,7 +28,7 @@ public:
 
   Matrix dot(const Matrix& other) const;
 
-  Matrix map(const double (*func) (double)&) const;
+  Matrix map(double (*func) (double)) const;
 
 private:
   std::vector<std::vector<double>> mat_;
