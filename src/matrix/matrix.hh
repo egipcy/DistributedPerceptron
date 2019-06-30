@@ -7,6 +7,7 @@ class Matrix
 public:
   Matrix() = delete;
   Matrix(int rows, int columns, double init_value = 0);
+  Matrix(std::vector<double> v);
 
   void randomize();
 
@@ -29,6 +30,8 @@ public:
   Matrix dot(const Matrix& other) const;
 
   Matrix map(double (*func) (double)) const;
+
+  std::vector<double> to_vect() const;
 
 private:
   std::vector<std::vector<double>> mat_;

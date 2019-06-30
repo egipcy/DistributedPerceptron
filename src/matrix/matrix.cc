@@ -8,10 +8,18 @@ Matrix::Matrix(int rows, int columns, double init_value)
   : rows_(rows)
   , columns_(columns)
 {
-  for (int i = 0; i < rows; i++)
-    mat_.emplace_back(columns, init_value);
+  for (int i = 0; i < rows_; i++)
+    mat_.emplace_back(columns_, init_value);
 
   std::srand(std::time(nullptr));
+}
+
+Matrix(std::vector<double> v)
+  : rows_(v.size())
+  , columns_(1)
+{
+  for (int i = 0; i < rows_; i++)
+    mat_.emplace_back(1, v[i]);
 }
 
 void Matrix::randomize()
@@ -142,6 +150,17 @@ Matrix Matrix::map(double (*func) (double)) const
   for (auto& line: ret.mat_)
     for (auto& e: line)
       e = func(e);
+
+  return ret;
+}
+
+std::vector<double> Matrix::to_vect() const
+{
+  assert(columns_ == 1);
+
+  std::vector<double> ret(rows_);
+  for (int i = 0; i < rows_; i++)
+    ret[i] = mat_[i][0];
 
   return ret;
 }
