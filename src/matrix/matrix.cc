@@ -14,7 +14,7 @@ Matrix::Matrix(int rows, int columns, double init_value)
   std::srand(std::time(nullptr));
 }
 
-Matrix(std::vector<double> v)
+Matrix::Matrix(std::vector<double> v)
   : rows_(v.size())
   , columns_(1)
 {
@@ -87,6 +87,38 @@ Matrix Matrix::operator+(const Matrix& other) const
   return ret;
 }
 
+Matrix Matrix::operator-() const
+{
+  Matrix ret(*this);
+
+  for (auto& line: ret.mat_)
+    for (auto& e: line)
+      e = -e;
+
+  return ret;
+}
+
+Matrix& Matrix::operator-=(double n)
+{
+  return operator+=(-n);
+}
+
+Matrix& Matrix::operator-=(const Matrix& other)
+{
+  *this += -other;
+  return *this;
+}
+
+Matrix Matrix::operator-(double n) const
+{
+  return operator+(-n);
+}
+
+Matrix Matrix::operator-(const Matrix& other) const
+{
+  return *this + (-other);
+}
+
 Matrix& Matrix::operator*=(double n)
 {
   for (auto& line: mat_)
@@ -121,6 +153,17 @@ Matrix Matrix::operator*(const Matrix& other) const // Hadamard product
   Matrix ret(*this);
 
   ret *= other;
+
+  return ret;
+}
+
+Matrix Matrix::transpose() const
+{
+  Matrix ret(columns(), rows());
+
+  for (int i = 0; i < columns(); i++)
+    for (int j = 0; j < rows(); j++)
+      ret[i][j] = (*this)[j][i];
 
   return ret;
 }
@@ -163,4 +206,19 @@ std::vector<double> Matrix::to_vect() const
     ret[i] = mat_[i][0];
 
   return ret;
+}
+
+Matrix operator+(double n, const Matrix& other)
+{
+  return other + n;
+}
+
+Matrix operator-(double n, const Matrix& other)
+{
+  return other - n;
+}
+
+Matrix operator*(double n, const Matrix& other)
+{
+  return other * n;
 }

@@ -22,10 +22,18 @@ public:
   Matrix operator+(double n) const;
   Matrix operator+(const Matrix& other) const;
 
+  Matrix operator-() const;
+  Matrix& operator-=(double n);
+  Matrix& operator-=(const Matrix& other);
+  Matrix operator-(double n) const;
+  Matrix operator-(const Matrix& other) const;
+
   Matrix& operator*=(double n);
   Matrix& operator*=(const Matrix& other); // Hadamard product
   Matrix operator*(double n) const;
   Matrix operator*(const Matrix& other) const; // Hadamard product
+
+  Matrix transpose() const;
 
   Matrix dot(const Matrix& other) const;
 
@@ -38,3 +46,7 @@ private:
   int rows_;
   int columns_;
 };
+
+Matrix operator+(double n, const Matrix& other);
+Matrix operator-(double n, const Matrix& other);
+Matrix operator*(double n, const Matrix& other);

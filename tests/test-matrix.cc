@@ -31,6 +31,7 @@ int main()
 
   print(m.dot(m2));
   print(((m+1)*2).map(std::sqrt));
+  print(m*3-2*m);
 
   return 0;
 }
