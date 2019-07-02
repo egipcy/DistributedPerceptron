@@ -10,7 +10,7 @@ int print_usage_and_exit()
 
   MPI_Finalize();
 
-  return 0;
+  return 0; //WHY 0 ?
 }
 
 std::pair<Matrix, std::vector<double>>
@@ -69,17 +69,25 @@ int main(int argc, char** argv)
   // Parsing arguments
   if (argc != 5)
     return print_usage_and_exit();
-  int world_size;
+  int world_size, world_rank;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-  // Get the rank of the process
-  int world_rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
   datas = read_file(std::string(argv[1]));
-  /* TODO
-  int nb_masters = ...;
-  int nb_workers = ...;
-  int nb_epochs = ...;
+
+  /**
+   * Basic version
+   * nb_masters should depend on world_size
+  */
+  int nb_masters = 1;
+  int nb_workers = world_size - nb_masters;
+  int nb_epochs = 70;
+
+  /** We should exit
+  if (nb_workers == 0)
+  {
+     
+  }
   */
 
   auto pair = build_masters_workers(nb_masters, nb_workers, nb_epochs, datas);
