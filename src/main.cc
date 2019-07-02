@@ -1,4 +1,5 @@
 #include <iostream>
+#include "mpi.h"
 
 #include "master.hh"
 #include "worker.hh"
@@ -49,9 +50,21 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
   return std::pair<>(masters, workers);
 }
 
+void mpi_init_failed()
+{
+  std::cout << "\n";
+  std::cout << "HELLO_MPI - Fatal error!\n";
+  std::cout << "  MPI_Init returned nonzero ierr.\n";
+  exit(1);
+}
+
 int main(int argc, char** argv)
 {
-  MPI_Init(&argc, &argv);
+  int ierr = MPI_Init(&argc, &argv);
+  if (ierr != 0)
+  {
+    mpi_init_failed();
+  }
   //TEST
   // Parsing arguments
   if (argc != 5)
