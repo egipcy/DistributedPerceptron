@@ -52,7 +52,7 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
 int main(int argc, char** argv)
 {
   MPI_Init(&argc, &argv);
-
+  //TEST
   // Parsing arguments
   if (argc != 5)
     return print_usage_and_exit();
