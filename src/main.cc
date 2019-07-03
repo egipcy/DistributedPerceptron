@@ -11,7 +11,7 @@ int print_usage_and_exit()
 
   return 0; //WHY 0 ?
 }
-
+  /*
 std::pair<Matrix, std::vector<double>>
 read_file(std::string filename)
 {
@@ -21,7 +21,7 @@ read_file(std::string filename)
   ** n-1 first values goes in X (matrix aka vector of vectors)
   ** last value goes in y (vector)
   */
- 
+   /*
   return std::pair<Matrix, std::vector<double>>();
 }
 
@@ -48,99 +48,13 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
 
   return std::pair<std::vector<Master>, std::vector<Worker>>(masters, workers);
 }
-
+*/
 void mpi_init_failed()
 {
   std::cout << "\n";
   std::cout << "HELLO_MPI - Fatal error!\n";
   std::cout << "  MPI_Init returned nonzero ierr.\n";
   exit(1);
-}
-
-int main2(int argc, char** argv)
-{
-  int ierr = MPI_Init(&argc, &argv);
-  if (ierr != 0)
-  {
-    mpi_init_failed();
-  }
-  //TEST
-  // Parsing arguments
-  if (argc != 5)
-    return print_usage_and_exit();
-  int world_size, world_rank;
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-  //datas = read_file(std::string(argv[1]));
-
-  /**
-   * Basic version
-   * nb_masters should depend on world_size
-  */
-  int nb_masters = 1;
-  int nb_workers = world_size - nb_masters;
-  int nb_epochs = 70;
-
-  /** We should exit
-  if (nb_workers == 0)
-  {
-
-  }
-  */
-
-  auto pair = build_masters_workers(nb_masters, nb_workers, nb_epochs, datas);
-  auto masters = pair.first;
-  auto workers = pair.second;
-
-  // Start everybody
-  // send message tag 1
-  for (auto& m: masters)
-    m.start();
-
-  for (auto& w: workers)
-    w.start();
-
-  bool loop = true;
-  while (loop)
-  {
-    for (auto& m: masters)
-      if (!m.run())
-      {
-        loop = false;
-        break;
-      }
-      
-    for (auto& w: workers)
-      w.run();
-
-    // Killing loop
-    /* TODO
-    if (key pressed)
-    {
-      int number;
-      std::cin >> number;
-      if (number < masters.count())
-      {
-        if (masters[number].is_awake())
-          masters[number].sleep();
-        else
-          masters[number].awake();
-      }
-      else
-      {
-        if (workers[number - masters.count()].is_awake())
-          workers[number - masters.count()].sleep();
-        else
-          workers[number - masters.count()].awake();
-      }
-    }
-    */
-  }
-
-  MPI_Finalize();
-
-  return 0;
 }
 
 int main(int argc, char** argv)
