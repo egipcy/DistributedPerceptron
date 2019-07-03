@@ -4,7 +4,7 @@
 class Process
 {
 public:
-  Process(int id, int world_size, int nb_epoch);
+  Process(int id, int world_size);
 
   void start();
   void elect_president();

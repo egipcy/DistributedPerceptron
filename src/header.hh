@@ -1,4 +1,4 @@
 /* header.hh */
 #pragma once
 
-#define NB_EPOCHS 40
+#define __NB_EPOCHS__ 40

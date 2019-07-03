@@ -3,6 +3,7 @@
 
 #include "master.hh"
 #include "worker.hh"
+#include "process.hh"
 
 int print_usage_and_exit()
 {
@@ -73,7 +74,7 @@ int main2(int argc, char** argv)
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-  datas = read_file(std::string(argv[1]));
+  //datas = read_file(std::string(argv[1]));
 
   /**
    * Basic version
@@ -155,39 +156,39 @@ int main(int argc, char** argv)
     mpi_init_failed();
   }
 
-  Process process = new Process
   if (argc != 5)
     return print_usage_and_exit();
   int world_size, world_rank;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  Process* process = new Process(world_rank, world_size);
   int flag = 0;
-  process.elect_president();
+  process->elect_president();
 
 /*After Election President */
   while(flag != -1)
   {
-     MPI_Status status;
-     int data;
-     MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE,  MPI_ANY_TAG, MPI_COMM_WORLD, $status)
+    MPI_Status status;
+    int data;
+    MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE,  MPI_ANY_TAG, MPI_COMM_WORLD, &status);
   
     switch (status.MPI_TAG)
-      {   
+    {   
         case 0:
-        std::cout << word_rank << " " <<status.MPI_SOURCE  << std::endl;    
+        std::cout << world_rank << " " <<status.MPI_SOURCE  << std::endl;    
         break;
         case -1:
-          flag = status_MPI_TAG;
+          flag = status.MPI_TAG;
           break;
-          case 1:
-          flag = status_MPI_TAG;
+        case 1:
+          flag = status.MPI_TAG;
           break;
           /* Process become worker */
-          default:
+        default:
           std::cout << "STRANGE TAG: " << status.MPI_TAG << std::endl;
           break;
-      }
-     flag = status_MPI_TAG;
+    }
+    flag = status.MPI_TAG;
   }
  //datas = read_file(std::string(argv[1]));
 

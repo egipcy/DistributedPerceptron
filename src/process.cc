@@ -3,10 +3,10 @@
 #include <mpi.h>
 
 
-Process::Process(int id, int world_size, int nb_epoch = NB_EPOCHS)
+Process::Process(int id, int world_size)
   : id_(id)
   , world_size_(world_size)
-  , nb_epochs_(nb_epoch)
+  , nb_epochs_(__NB_EPOCHS__)
 { }
 
 void Process::start()
