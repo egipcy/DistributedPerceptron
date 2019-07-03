@@ -67,8 +67,6 @@ int main(int argc, char** argv)
     mpi_init_failed();
   }
 
-  if (argc != 5)
-    return print_usage_and_exit();
   int world_size, world_rank;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
