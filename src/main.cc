@@ -22,7 +22,7 @@ read_file(std::string filename)
   ** n-1 first values goes in X (matrix aka vector of vectors)
   ** last value goes in y (vector)
   */
-
+ 
   return std::pair<Matrix, std::vector<double>>();
 }
 
@@ -47,7 +47,7 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
   for (auto i = 0; i < nb_workers; i++)
     workers.emplace_back(ids_workers[i], ids_masters, ids_workers);
 
-  return std::pair<>(masters, workers);
+  return std::pair<std::vector<Master>, std::vector<Worker>>(masters, workers);
 }
 
 void mpi_init_failed()
