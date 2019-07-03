@@ -1,6 +1,6 @@
 TODO
 
 Different tags:
-          0 --New  President Elected
-          1 --Start
-          -1 --The process stop
+0: President election round
+1: New  President Elected
+-1: The process stop
