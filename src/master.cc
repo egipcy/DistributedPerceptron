@@ -57,11 +57,13 @@ void Master::sleep()
 int Master::elect_president() const
 {
   // TODO
-  return -1;
+  return this->id_;
 }
 
 void Master::broadcast_president() const
 {
+  //mpi Send with tag 0
+  
   // TODO
 }
 

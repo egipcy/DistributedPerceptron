@@ -58,7 +58,7 @@ void mpi_init_failed()
   exit(1);
 }
 
-int main(int argc, char** argv)
+int main2(int argc, char** argv)
 {
   int ierr = MPI_Init(&argc, &argv);
   if (ierr != 0)
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
   /** We should exit
   if (nb_workers == 0)
   {
-     
+
   }
   */
 
@@ -95,8 +95,10 @@ int main(int argc, char** argv)
   auto workers = pair.second;
 
   // Start everybody
+  // send message tag 1
   for (auto& m: masters)
     m.start();
+
   for (auto& w: workers)
     w.start();
 
@@ -142,3 +144,30 @@ int main(int argc, char** argv)
   return 0;
 }
 
+int main(int argc, char** argv)
+{
+  //Création 1 Worker
+  //Election President
+  //Recv
+  int ierr = MPI_Init(&argc, &argv);
+  if (ierr != 0)
+  {
+    mpi_init_failed();
+  }
+  Process process = new Process
+  if (argc != 5)
+    return print_usage_and_exit();
+  int world_size, world_rank;
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  int flag = 0;
+  process.elect_president();
+  while(flag != -1)
+  {
+    std::String msg;
+
+  }
+ //datas = read_file(std::string(argv[1]));
+
+  return 0;
+}
