@@ -1,8 +1,6 @@
 #include <iostream>
 #include "mpi.h"
 
-#include "master.hh"
-#include "worker.hh"
 #include "process.hh"
 
 int print_usage_and_exit()
