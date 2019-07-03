@@ -2,5 +2,7 @@ TODO
 
 Different tags:
 0: President election round
+  Contient les informations pertinentes pour se comparer entre process.
 1: New  President Elected
+  Contient l'id du president
 -1: The process stop
