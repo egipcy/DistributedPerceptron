@@ -23,8 +23,8 @@ read_file(std::string filename)
   */
    /*
   return std::pair<Matrix, std::vector<double>>();
-}
-
+}*/
+ /*
 std::pair<std::vector<Master>, std::vector<Worker>>
 build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
   std::pair<Matrix, std::vector<double>> datas)
@@ -56,7 +56,6 @@ void mpi_init_failed()
   std::cout << "  MPI_Init returned nonzero ierr.\n";
   exit(1);
 }
-
 int main(int argc, char** argv)
 {
   //Création 1 Worker
