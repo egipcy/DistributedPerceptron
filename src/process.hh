@@ -10,7 +10,7 @@ public:
   void elect_president();
 
 private:
-  int id_;
+  const int id_;
   int world_size_;
   int nb_epochs_;
 };
