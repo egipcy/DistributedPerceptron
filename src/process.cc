@@ -14,6 +14,10 @@ void Process::start()
 {
 }
 
+/**
+ * Elects a new president + broadcast president id
+ * At the exit of this the function prsident_id_ is set
+*/
 void Process::elect_president()
 {
   int id = this->id_;
