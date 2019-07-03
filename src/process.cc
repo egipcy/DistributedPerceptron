@@ -12,7 +12,7 @@ void Process::start()
 {
 }
 
-void Process::elect_predisent()
+void Process::elect_president()
 {
   
 }

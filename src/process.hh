@@ -7,7 +7,7 @@ public:
   Process(int id, int world_size, int nb_epoch);
 
   void start();
-  void elect_predisent();
+  void elect_president();
 
 private:
   int id_;
