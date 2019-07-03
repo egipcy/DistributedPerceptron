@@ -41,7 +41,7 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
 
   // Init masters and workers
   std::vector<Master> masters;
-  std::vector<Workers> workers;
+  std::vector<Worker> workers;
   for (auto i = 0; i < nb_masters; i++)
     masters.emplace_back(ids_masters[i], ids_masters, ids_workers, nb_epochs, datas);
   for (auto i = 0; i < nb_workers; i++)
