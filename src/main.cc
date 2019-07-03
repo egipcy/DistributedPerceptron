@@ -154,6 +154,7 @@ int main(int argc, char** argv)
   {
     mpi_init_failed();
   }
+
   Process process = new Process
   if (argc != 5)
     return print_usage_and_exit();
@@ -162,12 +163,34 @@ int main(int argc, char** argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
   int flag = 0;
   process.elect_president();
+
+/*After Election President */
   while(flag != -1)
   {
-    std::String msg;
-
+     MPI_Status status;
+     int data;
+     MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE,  MPI_ANY_TAG, MPI_COMM_WORLD, $status)
+  
+    switch (status.MPI_TAG)
+      {   
+        case 0:
+        std::cout << word_rank << " " <<status.MPI_SOURCE  << std::endl;    
+        break;
+        case -1:
+          flag = status_MPI_TAG;
+          break;
+          case 1:
+          flag = status_MPI_TAG;
+          break;
+          /* Process become worker */
+          default:
+          std::cout << "STRANGE TAG: " << status.MPI_TAG << std::endl;
+          break;
+      }
+     flag = status_MPI_TAG;
   }
  //datas = read_file(std::string(argv[1]));
 
+  MPI_Finalize();
   return 0;
 }
