@@ -1,6 +1,5 @@
 #include <iostream>
 #include "mpi.h"
-
 #include "process.hh"
 
 int print_usage_and_exit()
@@ -58,9 +57,7 @@ void mpi_init_failed()
 }
 int main(int argc, char** argv)
 {
-  //Création 1 Worker
-  //Election President
-  //Recv
+  /* MPI init */
   int ierr = MPI_Init(&argc, &argv);
   if (ierr != 0)
   {
@@ -72,7 +69,9 @@ int main(int argc, char** argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
   Process* process = new Process(world_rank, world_size);
   int flag = 0;
-  process->elect_president();
+
+  /* Elect a president */
+  process->elect_president(world_rank, world_size);
 
 /*After Election President */
   while(flag != -1)
@@ -83,19 +82,19 @@ int main(int argc, char** argv)
   
     switch (status.MPI_TAG)
     {   
-        case 0:
+      case 0:
         std::cout << world_rank << " " <<status.MPI_SOURCE  << std::endl;    
         break;
-        case -1:
-          flag = status.MPI_TAG;
-          break;
-        case 1:
-          flag = status.MPI_TAG;
-          break;
-          /* Process become worker */
-        default:
-          std::cout << "STRANGE TAG: " << status.MPI_TAG << std::endl;
-          break;
+      case -1:
+        flag = status.MPI_TAG;
+        break;
+      case 1:
+        flag = status.MPI_TAG;
+        break;
+        /* Process become worker */
+      default:
+        std::cout << "STRANGE TAG: " << status.MPI_TAG << std::endl;
+        break;
     }
     flag = status.MPI_TAG;
   }

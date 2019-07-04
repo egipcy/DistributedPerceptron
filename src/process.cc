@@ -14,15 +14,16 @@ void Process::start()
 {
 }
 
+void Process::set_president(int president_id) {
+  this->president_id_ = president_id;
+}
+
 /**
  * Elects a new president + broadcast president id
  * At the exit of this the function prsident_id_ is set
 */
-void Process::elect_president()
+void Process::elect_president(int world_rank, int world_size)
 {
-  int id = this->id_;
-  int prevId = id - 1 < 0 ? this->world_size_ - 1 : id - 1;
-  int nextId = id + 1 >= this->world_size_ ? 0 : id + 1;
-  MPI_Send(&id, 1, MPI_INT, prevId, 0, MPI_COMM_WORLD);
-  MPI_Send(&id, 1, MPI_INT, nextId, 0, MPI_COMM_WORLD);
+  // President is always 0. The real version should be implemented later
+  this->set_president(0);
 }
