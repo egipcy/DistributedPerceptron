@@ -1,6 +1,9 @@
 #include <iostream>
 #include "mpi.h"
 #include "process.hh"
+#include "matrix/Matrix/matrix.h"
+#include <fstream>
+#include <string>
 
 int print_usage_and_exit()
 {
@@ -10,19 +13,7 @@ int print_usage_and_exit()
 
   return 0; //WHY 0 ?
 }
-  /*
-std::pair<Matrix, std::vector<double>>
-read_file(std::string filename)
-{
-  /* TODO:
-  ** open file
-  ** for each line, split separators (,;)
-  ** n-1 first values goes in X (matrix aka vector of vectors)
-  ** last value goes in y (vector)
-  */
-   /*
-  return std::pair<Matrix, std::vector<double>>();
-}*/
+  /**/
  /*
 std::pair<std::vector<Master>, std::vector<Worker>>
 build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
@@ -48,6 +39,26 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
   return std::pair<std::vector<Master>, std::vector<Worker>>(masters, workers);
 }
 */
+
+//std::pair<Matrix, std::vector<double>>
+void
+read_file(std::string filename)
+{
+  /* TODO:
+  ** open file
+  ** for each line, split separators (,;)
+  ** n-1 first values goes in X (matrix aka vector of vectors)
+  ** last value goes in y (vector)
+  */
+  std::ifstream file (filename, std::ifstream::in);
+  std::string line;
+  while (getline(file, line)) {
+    std::cout << line << std::endl;
+  }
+  file.close();
+  //return std::pair<Matrix, std::vector<double>>();
+}
+
 void mpi_init_failed()
 {
   std::cout << "\n";
@@ -57,6 +68,7 @@ void mpi_init_failed()
 }
 int main(int argc, char** argv)
 {
+  read_file("train_0.data");
   /* MPI init */
   int ierr = MPI_Init(&argc, &argv);
   if (ierr != 0)
