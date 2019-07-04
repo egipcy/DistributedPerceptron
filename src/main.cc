@@ -1,6 +1,11 @@
 #include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <vector>
+#include <utility>
+#include <functional>
 #include "mpi.h"
-
 #include "process.hh"
 
 int print_usage_and_exit()
@@ -11,19 +16,43 @@ int print_usage_and_exit()
 
   return 0; //WHY 0 ?
 }
-  /*
+  
 std::pair<Matrix, std::vector<double>>
 read_file(std::string filename)
 {
-  /* TODO:
-  ** open file
-  ** for each line, split separators (,;)
-  ** n-1 first values goes in X (matrix aka vector of vectors)
-  ** last value goes in y (vector)
-  */
-   /*
-  return std::pair<Matrix, std::vector<double>>();
-}*/
+  //   open file
+  std::ifstream infile(filename);
+  std::string line;
+  std::vector<double> X;
+  std::vector<double> Y;
+  int row = 0;
+  int cols = 0;
+  //   for each line, split separators (,;)
+  if(!infile.is_open())
+    exit(1);
+  while(std::getline(infile, line))
+  {
+    std::stringstream iss(line);
+    std::string values;
+    while(std::getline(iss,values,';'))
+    {
+      if (row < 1)
+        cols++;
+      X.push_back(std::stod(values));
+    }
+    row++;
+  }
+  infile.close();
+
+  // creation du vector Y
+  for(int i = 1; i <= row; i++)
+  {
+    Y.push_back(X[cols*i-i]);
+    X.erase(X.begin()+(i*cols)-i);
+  }
+  cols = cols-1;
+  return  std::make_pair(Matrix(row,cols), X);
+}
  /*
 std::pair<std::vector<Master>, std::vector<Worker>>
 build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
@@ -56,6 +85,8 @@ void mpi_init_failed()
   std::cout << "  MPI_Init returned nonzero ierr.\n";
   exit(1);
 }
+
+
 int main(int argc, char** argv)
 {
   //Création 1 Worker
