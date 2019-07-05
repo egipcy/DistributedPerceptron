@@ -1,7 +1,7 @@
 #include <iostream>
 #include "mpi.h"
 #include "process.hh"
-#include "matrix/Matrix/matrix.h"
+#include "matrix/matrix.hh"
 #include <fstream>
 #include <string>
 
@@ -79,11 +79,11 @@ int main(int argc, char** argv)
   int world_size, world_rank;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-  Process* process = new Process(world_rank, world_size);
+  Process process(world_rank, world_size);
   int flag = 0;
 
   /* Elect a president */
-  process->elect_president(world_rank, world_size);
+  process.elect_president(world_rank, world_size);
 
 /*After Election President */
   while(flag != -1)

@@ -1,5 +1,6 @@
 #include "master.hh"
 
+
 Master::Master(int id, std::vector<int> ids_masters, std::vector<int> ids_workers, int nb_epochs,
   std::pair<Matrix, std::vector<double>> datas)
   : id_(id)
@@ -28,6 +29,10 @@ void Master::start()
 bool Master::run()
 {
   if (!is_awake() || president_id_ != id_)
+    /**
+     * wait the weights
+     * put a timer to start a new president election if any data received
+    */
     return true;
 
   broadcast_weights();
@@ -56,17 +61,21 @@ void Master::sleep()
 
 int Master::elect_president() const
 {
-  // TODO
+  /**
+   * elects a president between masters_ids
+  */
   return this->id_;
 }
 
 void Master::broadcast_president() const
 {
-  //mpi Send with tag 0
-  
+  //sends to workers (masters already know him)
   // TODO
 }
 
+/**
+ * creates a range
+*/
 std::vector<std::pair<Matrix, std::vector<double>>> Master::split_datas() const
 {
   // TODO
@@ -75,6 +84,9 @@ std::vector<std::pair<Matrix, std::vector<double>>> Master::split_datas() const
   return std::vector<std::pair<Matrix, std::vector<double>>>();
 }
 
+/**
+ * sends the range
+*/
 void Master::broadcast_splitted_datas() const
 {
   assert(splitted_datas_.count() == ids_workers_.count());

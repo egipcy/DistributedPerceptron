@@ -1,5 +1,8 @@
 #include "worker.hh"
 
+/**
+ * add data in the constructor
+*/
 Worker::Worker(int id, std::vector<int> ids_masters, std::vector<int> ids_workers)
   : id_(id)
   , ids_masters_(ids_masters)
@@ -10,13 +13,16 @@ Worker::Worker(int id, std::vector<int> ids_masters, std::vector<int> ids_worker
 
 void Worker::start()
 {
-  // Wait for president election
-  president_id_ = get_president();
-
   // Wait for datas
   datas_ = get_datas();
 }
 
+/**
+ * Should be an int to handle 3 cases :
+ *  is alive
+ *  is dead
+ *  should become a master
+*/
 bool Worker::run()
 {
   if (!is_awake())
@@ -52,6 +58,9 @@ int Worker::get_president() const
   return -1;
 }
 
+/**
+ * get range
+*/
 std::pair<Matrix, std::vector<double>> Worker::get_datas() const
 {
   // TODO
