@@ -7,9 +7,9 @@
 
 struct Parameters
 {
-  int nb_hidden_layers = 2,
-  int nb_hidden_neurons = 10,
-  double learning_rate = 0.01
+  int nb_hidden_layers = 2;
+  int nb_hidden_neurons = 10;
+  double learning_rate = 0.01;
 };
 
 enum class Type
