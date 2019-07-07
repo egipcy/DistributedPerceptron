@@ -1,6 +1,7 @@
 #include "process.hh"
-#include <mpi.h>
 
+#include <mpi.h>
+#include <iostream>
 #include <boost/algorithm/string.hpp>
 
 Process::Process(int rank, int w_size, const std::string& filename_data,

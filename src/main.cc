@@ -8,9 +8,8 @@
 #include "matrix/matrix.hh"
 
 
-
-
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   if (argc != __ARGC__)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
@@ -22,8 +21,10 @@ int main(int argc, char** argv) {
   int rank, w_size;
   MPI_Comm_size(MPI_COMM_WORLD, &w_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  Process p = Process(rank, w_size);
+
+  Process p = Process(rank, w_size, argv[1], argv[2], std::stod(argv[3]), std::stoi(argv[4]));
   p.elect_president();
+
   if (p.get_type() == Type::President)
   {
     p.elect_masters();
@@ -34,6 +35,7 @@ int main(int argc, char** argv) {
   int number_amount, flag;
   while (!p.has_ended())
   {
+    std::cout << "ok" << std::endl;
     int flag = false;
     while (!flag)
     {
