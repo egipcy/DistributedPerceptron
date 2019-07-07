@@ -11,12 +11,6 @@ public:
   NN(const std::vector<Matrix>& weights, const std::vector<Matrix>& biases);
   NN(const std::vector<int>& nb_neurons);
 
-  /*std::pair<std::vector<double>, std::vector<Matrix>>
-  forward(const std::vector<double>& inputs);
-
-  std::pair<std::vector<Matrix>, std::vector<Matrix>> backpropagation(
-    const std::vector<double>& inputs, const std::vector<double>& labels);*/
-
   std::pair<Matrix, std::vector<Matrix>> forward(const Matrix& inputs);
 
   std::pair<std::vector<Matrix>, std::vector<Matrix>> backpropagation(
