@@ -3,6 +3,9 @@
 #include <cassert>
 #include <iostream>
 
+NN::NN()
+{ }
+
 NN::NN(const std::vector<Matrix>& weights, const std::vector<Matrix>& biases)
   : weights_(weights)
   , biases_(biases)

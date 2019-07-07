@@ -22,7 +22,7 @@ enum class Type
 class Process
 {
 public:
-  Process(int rank, int world_size, const std::string& filename_data,
+  Process(int rank, int w_size, const std::string& filename_data,
     const std::string& filename_parameters, double ratio, int nb_epochs);
 
   int get_rank() const;

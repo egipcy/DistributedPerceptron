@@ -1,11 +1,12 @@
 #include "process.hh"
+#include <mpi.h>
 
 #include <boost/algorithm/string.hpp>
 
-Process::Process(int rank, int world_size, const std::string& filename_data,
+Process::Process(int rank, int w_size, const std::string& filename_data,
   const std::string& filename_parameters, double ratio, int nb_epochs)
   : rank_(rank)
-  , world_size_(world_size)
+  , w_size_(w_size)
   , type_(Type::Worker)
   , ratio_(ratio)
   , nb_epochs_(nb_epochs)
@@ -65,14 +66,13 @@ void Process::elect_president()
   if (type_ == Type::President)
   {
     std::vector<int> v;
-    v.push_back(datas_.first.size());
-    for (int i = 0; i < parameters_.nb_hidden_layers.size(); i++)
+    v.push_back(datas_.first.columns());
+    for (int i = 0; i < parameters_.nb_hidden_layers; i++)
       v.push_back(parameters_.nb_hidden_neurons);
-    v.push_back(datas_.second.size());
+    v.push_back(datas_.second.columns());
 
     nn_ = NN(v);
   }
-  president_id_ = 0
 }
 
 void Process::elect_masters()
@@ -98,7 +98,7 @@ void Process::init_datas(const std::string& filename_data)
   ** update datas_
   */
 
-  std::ifstream file_data(filename_data, ios::in);
+  std::ifstream file_data(filename_data, std::ios::in);
   if(!file_data.is_open())
     exit(1);
 
@@ -107,11 +107,11 @@ void Process::init_datas(const std::string& filename_data)
   std::vector<double> Y;
   while (std::getline(file_data, line))
   {
-    std::vector<string> result;
-    boost::split(result, line, boost::is_any_of(";"));
+    std::vector<std::string> result;
+    boost::split(result, line, boost::is_any_of(","));
 
     std::vector<double> x_double(result.size() - 1);
-    for (size_t i = 0; i < v_to_double.size() - 1; i++)
+    for (size_t i = 0; i < x_double.size(); i++)
       x_double[i] = std::stod(result[i]);
     double y_double = std::stod(result[result.size() - 1]);
 
@@ -126,7 +126,7 @@ void Process::init_datas(const std::string& filename_data)
 
 void Process::init_parameters(const std::string& filename_parameters)
 {
-  std::ifstream file_parameters(filename_parameters, ios::in);
+  std::ifstream file_parameters(filename_parameters, std::ios::in);
 
   std::string line;
 

@@ -7,7 +7,7 @@
 class NN
 {
 public:
-  NN() = delete;
+  NN();
   NN(const std::vector<Matrix>& weights, const std::vector<Matrix>& biases);
   NN(const std::vector<int>& nb_neurons);
 

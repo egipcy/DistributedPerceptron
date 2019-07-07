@@ -23,7 +23,7 @@ Matrix::Matrix(std::vector<double> v)
     mat_.emplace_back(1, v[i]);
 }
 
-Matrix(std::vector<std::vector<double>> mat)
+Matrix::Matrix(std::vector<std::vector<double>> mat)
   : rows_(mat.size())
   , columns_(mat[0].size())
   , mat_(mat)
