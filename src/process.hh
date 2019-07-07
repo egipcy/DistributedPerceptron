@@ -8,7 +8,8 @@
 struct Parameters
 {
   int nb_hidden_layers = 2,
-  int nb_hidden_neurons = 10
+  int nb_hidden_neurons = 10,
+  double learning_rate = 0.01
 };
 
 enum class Type
@@ -21,7 +22,8 @@ enum class Type
 class Process
 {
 public:
-  Process(int rank, int world_size, std::string filename_data, std::string filename_parameters, double ratio, int nb_epochs);
+  Process(int rank, int world_size, const std::string& filename_data,
+    const std::string& filename_parameters, double ratio, int nb_epochs);
 
   int get_rank() const;
 
@@ -50,10 +52,13 @@ private:
   int nb_epochs_;
 
   std::pair<Matrix, Matrix> datas_;
+  void init_datas(const std::string& filename_data);
+
   std::pair<int, int> range_;
 
   bool alive_;
   bool has_ended_;
 
   Parameters parameters_;
+  void init_parameters(const std::string& filename_parameters);
 };

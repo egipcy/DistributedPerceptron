@@ -2,7 +2,8 @@
 
 #include <boost/algorithm/string.hpp>
 
-Process::Process(int rank, int world_size, std::string filename_data, std::string filename_parameters, double ratio, int nb_epochs)
+Process::Process(int rank, int world_size, const std::string& filename_data,
+  const std::string& filename_parameters, double ratio, int nb_epochs)
   : rank_(rank)
   , world_size_(world_size)
   , type_(Type::Worker)
@@ -11,42 +12,8 @@ Process::Process(int rank, int world_size, std::string filename_data, std::strin
   , alive_(true)
   , has_ended_(false)
 {
-  /*
-  ** open file
-  ** for each line, split separators (,;)
-  ** n-1 first values goes in X (matrix aka vector of vectors)
-  ** last value goes in y (matrix aka vector of double)
-  ** update datas_
-  */
-
-  std::ifstream file_data(filename_data, ios::in);
-  if(!file_data.is_open())
-    exit(1);
-
-  std::string line;
-  std::vector<std::vector<double>> X;
-  std::vector<double> Y;
-  while (std::getline(file_data, line))
-  {
-    std::vector<string> result;
-    boost::split(result, line, boost::is_any_of(";"));
-
-    std::vector<double> x_double(result.size() - 1);
-    for (size_t i = 0; i < v_to_double.size() - 1; i++)
-      x_double[i] = std::stod(result[i]);
-    double y_double = std::stod(result[result.size() - 1]);
-
-    X.push_back(x_double);
-    Y.push_back(y_double);
-  }
-
-  file_data.close();
-
-  datas_ = std::pair<Matrix, Matrix>(Matrix(X), Matrix(Y));
-
-
-  std::ifstream file_parameters(file_parameters, ios::in);
-  // TODO
+  init_datas(filename_data);
+  init_parameters(filename_parameters);
 }
 
 int Process::get_rank() const
@@ -108,4 +75,52 @@ void Process::elect_masters()
 void Process::send_ranges()
 {
   // TODO
+}
+
+void Process::init_datas(const std::string& filename_data)
+{
+  /*
+  ** open file
+  ** for each line, split separators (,;)
+  ** n-1 first values goes in X (matrix aka vector of vectors)
+  ** last value goes in y (matrix aka vector of double)
+  ** update datas_
+  */
+
+  std::ifstream file_data(filename_data, ios::in);
+  if(!file_data.is_open())
+    exit(1);
+
+  std::string line;
+  std::vector<std::vector<double>> X;
+  std::vector<double> Y;
+  while (std::getline(file_data, line))
+  {
+    std::vector<string> result;
+    boost::split(result, line, boost::is_any_of(";"));
+
+    std::vector<double> x_double(result.size() - 1);
+    for (size_t i = 0; i < v_to_double.size() - 1; i++)
+      x_double[i] = std::stod(result[i]);
+    double y_double = std::stod(result[result.size() - 1]);
+
+    X.push_back(x_double);
+    Y.push_back(y_double);
+  }
+
+  file_data.close();
+
+  datas_ = std::pair<Matrix, Matrix>(Matrix(X), Matrix(Y));
+}
+
+void Process::init_parameters(const std::string& filename_parameters)
+{
+  std::ifstream file_parameters(filename_parameters, ios::in);
+
+  std::string line;
+
+  while (std::getline(file_parameters, line))
+  {
+    // TODO
+  }
 }
