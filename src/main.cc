@@ -14,7 +14,7 @@
 int main(int argc, char** argv) {
   if (argc != __ARGC__) {
     std::cerr << "Wrong number of arguments" << std::endl;
-    std::cerr << "Arguments : data's path, master/worker ratio, n_epoch"
+    std::cerr << "Arguments : data's path, config's path, master/worker ratio, n_epoch"
     return 1
   }
 
@@ -22,11 +22,12 @@ int main(int argc, char** argv) {
   int rank, w_size;
   MPI_Comm_size(MPI_COMM_WORLD, &w_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  Process p = Process(rank, w_size, argv[1], argv[2], argv[3]);
+  Process p = Process(rank, w_size, argv[1], argv[2], argv[3], argv[4]);
   p.elect_president();
   if (p.get_type() == Type::President)
   {
-
+    p.elect_masters();
+    p.send_ranges();
   }
   
   MPI_Status status;
