@@ -1,6 +1,6 @@
 #include "process.hh"
 
-Process::Process(int rank, int world_size, std::string filename, double ratio, int nb_epochs);
+Process::Process(int rank, int world_size, std::string filename_data, std::string filename_parameters, double ratio, int nb_epochs)
   : rank_(rank)
   , world_size_(world_size)
   , type_(Type::Worker)
@@ -9,7 +9,7 @@ Process::Process(int rank, int world_size, std::string filename, double ratio, i
   , alive_(true)
   , has_ended_(false)
 {
-  std::ifstream file(filename, ios::in);
+  std::ifstream file_data(filename_data, ios::in);
 
   /* TODO:
   ** open file
@@ -19,6 +19,9 @@ Process::Process(int rank, int world_size, std::string filename, double ratio, i
   ** update datas_
   */
   datas_ = std::pair<Matrix, Matrix>();
+
+  std::ifstream file_parameters(file_parameters, ios::in);
+  // TODO
 }
 
 int Process::get_rank() const
@@ -57,6 +60,27 @@ bool Process::has_ended() const
 }
 
 void Process::elect_president()
+{
+  // TODO
+
+  if (this->type == Type::President)
+  {
+    std::vector<int> v;
+    v.push_back(datas_.first.size());
+    for (int i = 0; i < parameters_.nb_hidden_layers.size(); i++)
+      v.push_back(parameters_.nb_hidden_neurons);
+    v.push_back(datas_.second.size());
+
+    nn_ = NN(v);
+  }
+}
+
+void Process::elect_masters()
+{
+  // TODO
+}
+
+void Process::send_ranges()
 {
   // TODO
 }
