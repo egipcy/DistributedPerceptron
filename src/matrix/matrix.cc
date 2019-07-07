@@ -13,7 +13,22 @@ Matrix::Matrix(int rows, int columns, double init_value)
 
   std::srand(std::time(nullptr));
 }
-
+Matrix::Matrix(int rows, int cols, std::vector<double> vect):
+rows_(rows),
+  columns_(cols)
+{
+  std::vector<double> lines;
+    for (int i = 0; i < vect.size(); i++)
+    {
+      if(i%cols == 0)
+      {
+        mat_.push_back(lines);
+        lines.clear();
+       }
+      lines.push_back(vect[i]);
+    }
+    mat_.push_back(lines);
+}
 Matrix::Matrix(std::vector<double> v)
   : rows_(v.size())
   , columns_(1)

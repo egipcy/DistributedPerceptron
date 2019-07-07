@@ -8,7 +8,7 @@ public:
   Matrix() = delete;
   Matrix(int rows, int columns, double init_value = 0);
   Matrix(std::vector<double> v);
-
+  Matrix(int rows, int cols, std::vector<double> vect);
   void randomize();
 
   int rows() const;

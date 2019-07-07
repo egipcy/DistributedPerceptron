@@ -24,8 +24,7 @@ read_file(std::string filename)
   std::ifstream infile(filename);
   std::string line;
   std::vector<double> X;
-
-  //std::vector<double> Y;
+  std::vector<double> Y;
   int row = 0;
   int cols = 0;
 
@@ -43,19 +42,23 @@ read_file(std::string filename)
       X.push_back(std::stod(values));
     }
     row++;
+    Y.push_back(X[cols*row-row]);
+    X.erase(X.begin()+(row*cols)-row); 
   }
   infile.close();
 
   // Create the vector  Y
   /*Move the N elt of each lines from  the matrix X to the vector Y  */
-  /*{
-  for(int i = 1; i <= row; i++)
-    Y.push_back(X[cols*i-i]);
-    X.erase(X.begin()+(i*cols)-i);
-  }
   cols = cols-1;
-    */
-  return  std::make_pair(Matrix(row,cols), X);
+  for(int i  = 0; i < X.size(); i++)
+  {
+    if(i % cols == 0)
+      std::cout << std::endl;
+    std::cout << X[i] ;
+  }
+  std::cout << std::endl;
+
+  return  std::make_pair(Matrix(row,cols,X), Y);
 }
  /*
 std::pair<std::vector<Master>, std::vector<Worker>>
