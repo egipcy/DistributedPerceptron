@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 
 #include "master.hh"
 #include "worker.hh"
@@ -51,6 +52,8 @@ build_masters_workers(int nb_masters, int nb_workers, int nb_epochs,
 
 int main(int argc, char** argv)
 {
+  std::srand(std::time(nullptr));
+
   MPI_Init(&argc, &argv);
 
   // Parsing arguments

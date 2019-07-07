@@ -1,8 +1,11 @@
-#include <ctime>
 #include <cstdlib>
 #include <cassert>
+#include <iostream>
 
 #include "matrix.hh"
+
+Matrix::Matrix()
+{ }
 
 Matrix::Matrix(int rows, int columns, double init_value)
   : rows_(rows)
@@ -10,8 +13,6 @@ Matrix::Matrix(int rows, int columns, double init_value)
 {
   for (int i = 0; i < rows_; i++)
     mat_.emplace_back(columns_, init_value);
-
-  std::srand(std::time(nullptr));
 }
 
 Matrix::Matrix(std::vector<double> v)
@@ -26,7 +27,7 @@ void Matrix::randomize()
 {
   for (auto& line: mat_)
     for (auto& e: line)
-      e = (std::rand() / (double)RAND_MAX - 0.5) * 2;
+      e = std::rand() / (double)RAND_MAX;
 }
 
 int Matrix::rows() const
@@ -177,7 +178,7 @@ Matrix Matrix::dot(const Matrix& other) const
   for (int i = 0; i < rows(); i++)
     for (int j = 0; j < other.columns(); j++)
     {
-      int s = 0;
+      double s = 0.0;
       for (int k = 0; k < columns(); k++)
         s += mat_[i][k] * other[k][j];
       ret[i][j] = s;
@@ -206,6 +207,18 @@ std::vector<double> Matrix::to_vect() const
     ret[i] = mat_[i][0];
 
   return ret;
+}
+
+void Matrix::print() const
+{
+  std::cout << rows() << ";" << columns() << std::endl;
+  for (int i = 0; i < rows(); i++)
+  {
+    for (int j = 0; j < columns(); j++)
+      std::cout << mat_[i][j] << "\t";
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
 }
 
 Matrix operator+(double n, const Matrix& other)

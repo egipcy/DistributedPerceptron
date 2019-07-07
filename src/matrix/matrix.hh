@@ -5,7 +5,7 @@
 class Matrix
 {
 public:
-  Matrix() = delete;
+  Matrix();
   Matrix(int rows, int columns, double init_value = 0);
   Matrix(std::vector<double> v);
 
@@ -40,6 +40,8 @@ public:
   Matrix map(double (*func) (double)) const;
 
   std::vector<double> to_vect() const;
+
+  void print() const;
 
 private:
   std::vector<std::vector<double>> mat_;
