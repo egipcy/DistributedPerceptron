@@ -11,10 +11,11 @@
 
 
 int main(int argc, char** argv) {
-  if (argc != __ARGC__) {
+  if (argc != __ARGC__)
+  {
     std::cerr << "Wrong number of arguments" << std::endl;
     std::cerr << "Arguments : data's path, config's path, master/worker ratio, n_epoch";
-    return 1
+    return 1;
   }
 
   MPI_Init(NULL, NULL);
@@ -59,7 +60,7 @@ int main(int argc, char** argv) {
           << status.MPI_SOURCE
           << std::endl;
       default:
-        std::cout << 'Tag doesn\'t match' << std::endl;
+        std::cout << "Tag doesn\'t match" << std::endl;
     }
     int number = 1;
     MPI_Send(&number, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
