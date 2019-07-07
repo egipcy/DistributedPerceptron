@@ -59,4 +59,8 @@ bool Process::has_ended() const
 void Process::elect_president()
 {
   // TODO
+  if (rank_ == 0)
+  {
+    type_ = Type::President;
+  }
 }

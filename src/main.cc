@@ -6,7 +6,6 @@
 
 #include "process.hh"
 #include "matrix/matrix.hh"
-#include "reader.cc"
 
 
 
@@ -34,19 +33,35 @@ int main(int argc, char** argv) {
   int number_amount, flag;
   while (!p.has_ended())
   {
-    if (p.get_type() == Type::President)
+    int flag = false;
+    while (!flag)
     {
-      MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+      if (p.get_type() == Type::President)
+      {
+        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+      }
+      else if (p.get_type() == Type::Worker)
+      {
+        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+      }
+      else
+      {
+        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+      }
     }
-    else if (p.get_type() == Type::Worker)
+    switch(status.MPI_TAG)
     {
-      
+      case 0:
+        std::cout << rank << std::endl;
+        break;
+      case 1:
+        std::cout << "President recieved a response from "
+          << status.MPI_SOURCE
+          << std::endl;
+      default:
+        std::cout << 'Tag doesn\'t match' << std::endl;
     }
-    else {
-
-    }
-    
-
-
+    int number = 1;
+    MPI_Send(&number, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
   }
 }
