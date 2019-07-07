@@ -18,11 +18,11 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  MPI_Init(NULL, NULL);
+  MPI_Init(&argc, &argv);
   int rank, w_size;
   MPI_Comm_size(MPI_COMM_WORLD, &w_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  Process p = Process(rank, w_size, argv[1], argv[2], std::stod(argv[3]), std::stoi(argv[4]));
+  Process p = Process(rank, w_size);
   p.elect_president();
   if (p.get_type() == Type::President)
   {
