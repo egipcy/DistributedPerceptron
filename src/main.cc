@@ -35,7 +35,10 @@ int main(int argc, char** argv)
   int number_amount;
   while (!p.has_ended())
   {
+<<<<<<< HEAD
     MPI_Status status;
+=======
+>>>>>>> e17f1c24bc16c79ba0aab28350150d66ef4c8a3e
     int flag = false;
     int recv_number=0;
     while (!flag)
