@@ -8,6 +8,7 @@ public:
   Matrix();
   Matrix(int rows, int columns, double init_value = 0);
   Matrix(std::vector<double> v);
+  Matrix(std::vector<std::vector<double>> mat);
 
   void randomize();
 
