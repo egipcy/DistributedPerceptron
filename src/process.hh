@@ -41,7 +41,7 @@ public:
 
 private:
   int rank_;
-  int world_size_;
+  int w_size_;
   int president_id_;
   std::vector<int> masters_;
 

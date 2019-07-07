@@ -86,6 +86,7 @@ bool Process::has_ended() const
 
 void Process::elect_president()
 {
+  //TODO
   // President election
   if (rank_ == 0)
   {
@@ -115,4 +116,7 @@ void Process::elect_masters()
 void Process::send_ranges()
 {
   // TODO
+  int number;
+  for (int i = 1; i < w_size_; i++)
+    MPI_Send(&number, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
 }
