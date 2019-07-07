@@ -2,8 +2,14 @@
 
 #include <fstream>
 #include <vector>
-
+#include "nn/nn.hh"
 #include "matrix/matrix.hh"
+
+struct Parameters
+{
+  int nb_hidden_layers = 2,
+  int nb_hidden_neurons = 10
+};
 
 enum class Type
 {
@@ -15,7 +21,7 @@ enum class Type
 class Process
 {
 public:
-  Process(int rank, int world_size, std::string filename, double ratio, int nb_epochs);
+  Process(int rank, int world_size, std::string filename_data, std::string filename_parameters, double ratio, int nb_epochs);
 
   int get_rank() const;
 
@@ -30,10 +36,14 @@ public:
   bool has_ended() const;
 
   void elect_president();
+  void elect_masters();
+  void send_ranges();
 
 private:
   int rank_;
   int world_size_;
+  int president_id_;
+  std::vector<int> masters_;
 
   Type type_;
   double ratio_;
@@ -46,4 +56,6 @@ private:
 
   bool alive_;
   bool has_ended_;
+
+  Parameters parameters_;
 };
