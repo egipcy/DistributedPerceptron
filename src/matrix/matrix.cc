@@ -23,6 +23,15 @@ Matrix::Matrix(std::vector<double> v)
     mat_.emplace_back(1, v[i]);
 }
 
+Matrix(std::vector<std::vector<double>> mat)
+  : rows_(mat.size())
+  , columns_(mat[0].size())
+  , mat_(mat)
+{
+  for (size_t i = 1; i < mat.size(); i++)
+    assert(mat[i].size() == mat[0].size());
+}
+
 void Matrix::randomize()
 {
   for (auto& line: mat_)
