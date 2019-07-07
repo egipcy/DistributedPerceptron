@@ -6,6 +6,8 @@ Process::Process(int rank, int world_size, std::string filename, double ratio, i
   , type_(Type::Worker)
   , ratio_(ratio)
   , nb_epochs_(nb_epochs)
+  , alive_(true)
+  , has_ended_(false)
 {
   std::ifstream file(filename, ios::in);
 
@@ -37,6 +39,21 @@ void Process::set_type(Type type)
 NN& Process::get_nn()
 {
   return nn_;
+}
+
+bool Process::is_alive() const
+{
+  return alive_;
+}
+
+void Process::set_alive(bool alive)
+{
+  alive_ = alive;
+}
+
+bool Process::has_ended() const
+{
+  return has_ended_;
 }
 
 void Process::elect_president()

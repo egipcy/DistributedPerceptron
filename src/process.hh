@@ -24,15 +24,26 @@ public:
 
   NN& get_nn();
 
+  bool is_alive() const;
+  void set_alive(bool alive);
+
+  bool has_ended() const;
+
   void elect_president();
 
 private:
   int rank_;
   int world_size_;
+
   Type type_;
-  NN nn_;
   double ratio_;
+
+  NN nn_;
   int nb_epochs_;
+
   std::pair<Matrix, Matrix> datas_;
   std::pair<int, int> range_;
+
+  bool alive_;
+  bool has_ended_;
 };
