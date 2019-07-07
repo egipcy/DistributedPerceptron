@@ -35,7 +35,6 @@ int main(int argc, char** argv)
   int number_amount, flag;
   while (!p.has_ended())
   {
-    std::cout << "ok" << std::endl;
     int flag = false;
     while (!flag)
     {

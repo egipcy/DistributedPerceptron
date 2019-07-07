@@ -101,7 +101,10 @@ void Process::init_datas(const std::string& filename_data)
 
   std::ifstream file_data(filename_data, std::ios::in);
   if(!file_data.is_open())
+  {
+    std::cerr << "File not found: " << filename_data << std::endl;
     exit(1);
+  }
 
   std::string line;
   std::vector<std::vector<double>> X;
@@ -128,11 +131,25 @@ void Process::init_datas(const std::string& filename_data)
 void Process::init_parameters(const std::string& filename_parameters)
 {
   std::ifstream file_parameters(filename_parameters, std::ios::in);
+  if(!file_parameters.is_open())
+  {
+    std::cerr << "File not found: " << filename_parameters << std::endl;
+    exit(1);
+  }
 
   std::string line;
 
   while (std::getline(file_parameters, line))
   {
-    // TODO
+    std::string param = line.substr(0, line.find_first_of(" ="));
+    std::string value = line.substr(line.find_last_of(" =") + 1);
+    if (param == "nb_hidden_layers")
+      parameters_.nb_hidden_layers = std::stoi(value);
+    else if (param == "nb_hidden_neurons")
+      parameters_.nb_hidden_neurons = std::stoi(value);
+    else if (param == "learning_rate")
+      parameters_.learning_rate = std::stod(value);
+    else
+      std::cerr << "Unknown parameter: " << param << std::endl;
   }
 }
