@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <vector>
-
+#include "nn/nn.hh"
 #include "matrix/matrix.hh"
 
 struct Parameters
@@ -43,7 +43,9 @@ public:
 
 private:
   int rank_;
-  int world_size_;
+  int w_size_;
+  int president_id_;
+  std::vector<int> masters_;
 
   Type type_;
   double ratio_;

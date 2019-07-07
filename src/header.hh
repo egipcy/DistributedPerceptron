@@ -1,5 +1,2 @@
-#ifndef ENV
-#define ENV
-#define __ARGC__ 4
-
-#endif ENV
+#pragma once
+#define __ARGC__ 5
