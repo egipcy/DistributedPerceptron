@@ -21,7 +21,8 @@ enum class Type
 
 enum class Tag
 {
-  WeightsDimensions = 1
+  WeightsDimensions = 1,
+  SendWeights = 2
 };
 
 class Process
@@ -54,6 +55,7 @@ private:
   int rank_;
   int world_size_;
   int president_id_;
+  std::vector<Matrix> weights_;
   std::vector<int> masters_;
   std::vector<int> workers_;
 
