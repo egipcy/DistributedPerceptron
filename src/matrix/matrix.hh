@@ -13,8 +13,8 @@ public:
   void randomize();
 
   int rows() const;
-  int columns() const;
-
+  int columns() const; 
+  std::vector<std::vector<double>>mat();
   std::vector<double>& operator[](int index);
   std::vector<double> operator[](int index) const;
 
@@ -44,6 +44,9 @@ public:
 
   void print() const;
 
+friend std::vector<Matrix> deserialize(std::vector<double> vect);
+friend std::vector<double> serialize(std::vector<Matrix> Matrix);
+ 
 private:
   std::vector<std::vector<double>> mat_;
   int rows_;
