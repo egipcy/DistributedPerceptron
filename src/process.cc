@@ -65,36 +65,19 @@ void Process::elect_president()
   president_id_ = 0;
 
   // Init neural network
-  if (type_ == Type::President)
-  {
-    std::vector<int> v;
-    v.push_back(datas_.first.columns());
-    for (int i = 0; i < parameters_.nb_hidden_layers; i++)
-      v.push_back(parameters_.nb_hidden_neurons);
-    v.push_back(datas_.second.columns());
+  std::vector<int> v;
+  v.push_back(datas_.first.columns());
+  for (int i = 0; i < parameters_.nb_hidden_layers; i++)
+    v.push_back(parameters_.nb_hidden_neurons);
+  v.push_back(datas_.second.columns());
 
-    nn_ = NN(v);
-  }
+  nn_ = NN(v);
 }
 
 void Process::elect_masters()
 {
   // TODO
   // Fill masters_ and workers_ with their ranks
-}
-
-void Process::send_weights_dimensions()
-{
-  auto weights = nn_.get_weights();
-
-  for (auto rank_worker: workers_)
-  {
-    std::vector<int> v;
-    v.push_back(weights.size());
-    for 
-
-    MPI_Send(&number, 1, MPI_INT, rank_worker, Tag::WeightsDimensions, MPI_COMM_WORLD);
-  }
 }
 
 void Process::init_datas(const std::string& filename_data)

@@ -28,7 +28,6 @@ int main(int argc, char** argv)
   if (p.get_type() == Type::President)
   {
     p.elect_masters();
-    p.send_weights_dimensions();
   }
   
   MPI_Status status;
@@ -52,13 +51,13 @@ int main(int argc, char** argv)
       }
     }
 
-    switch(status.MPI_TAG)
+    switch (status.MPI_TAG)
     {
       case Tag::WeightsMatrix:
         MPI_Get_count(&status, MPI_DOUBLE, &count);
-        std::vector<double> weights(count);
-        MPI_Recv(weights.data(), count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-        p.set_weights(weights);
+        std::vector<double> w(count);
+        MPI_Recv(w.data(), count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+        p.set_weights(w);
         break;
       case 2:
         std::cout << "President reccompletedcompletedcompletedcompletedieved a response from "

@@ -21,8 +21,7 @@ enum class Type
 
 enum Tag
 {
-  WeightsDimensions = 1,
-  WeightsMatrix = 2
+  WeightsMatrix = 1
 };
 
 class Process
@@ -45,7 +44,6 @@ public:
 
   void elect_president();
   void elect_masters();
-  void send_weights_dimensions();
 
   /* Communication */
   void send_weights(int dest, int tag);
