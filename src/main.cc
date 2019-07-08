@@ -13,7 +13,7 @@ int main(int argc, char** argv)
   if (argc != __ARGC__)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
-    std::cerr << "Arguments : data's path, config's path, master/worker ratio, n_epoch";
+    std::cerr << "Arguments : data's path, config's path";
     return 1;
   }
 
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  Process p = Process(rank, world_size, argv[1], argv[2], std::stod(argv[3]), std::stoi(argv[4]));
+  Process p = Process(rank, world_size, argv[1], argv[2]);
   p.elect_president();
 
   if (p.get_type() == Type::President)
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
       if(p.get_type() == Type::Worker)
       {
         p.set_weights_biases(w, b);
-        std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradient(); //weights, biases
+        std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradients(); //weights, biases
         auto g_weights = serialize(g.first);
         auto g_biases = serialize(g.second);
         MPI_Send(g_weights.data(), g_weights.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD);
@@ -78,11 +78,19 @@ int main(int argc, char** argv)
       }
       else // if (p.get_type() == Type::President)
       {
-        p.update_nn(w, b);
+        bool ended = p.update_nn(w, b);
+        if (ended)
+        {
+          p.end_all(); //send the tag Finished to everybody
+          std::cout << "Ended with success" << std::endl;
+        }
         std::cout << "s" << std::endl;
         p.send_weights(status.MPI_SOURCE);
       }
-      
+    }
+    else if (t == Tag::Finished)
+    {
+      p.end();
     }
   }
 }

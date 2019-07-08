@@ -22,7 +22,8 @@ enum class Type
 enum Tag
 {
   WeightsMatrix = 1,
-  BiasesMatrix
+  BiasesMatrix,
+  Finished
 };
 
 class Process
