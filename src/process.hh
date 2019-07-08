@@ -39,7 +39,6 @@ public:
 
   void elect_president();
   void elect_masters();
-  void send_ranges();
 
 private:
   int rank_;

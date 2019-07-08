@@ -80,17 +80,6 @@ void Process::elect_masters()
   // TODO
 }
 
-void Process::send_ranges()
-{
-  // TODO
-
-  for (int i = 1; i < w_size_; i++)
-  {
-    int number = 0;
-    MPI_Send(&number, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
-  }
-}
-
 void Process::init_datas(const std::string& filename_data)
 {
   /*
