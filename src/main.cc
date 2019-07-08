@@ -57,7 +57,7 @@ int main(int argc, char** argv)
       case Tag::WeightsDimensions:
         MPI_Get_count(&status, MPI_INT, &count);
         std::vector<int> dimensions(count);
-        MPI_Recv(&dimensions, count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(dimensions.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
         p.receive_weights_dimensions(dimensions);
         break;
       case 2:
