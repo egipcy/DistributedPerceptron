@@ -58,11 +58,18 @@ void Process::elect_president()
   // TODO
 
   // President election
-  if (rank_ == 0)
+  president_id_ = 0;
+
+  if (rank_ == president_id_)
   {
     type_ = Type::President;
+    for (int i = 0; i < world_size_; i++)
+    {
+      if (i == president_id_)
+        continue;
+      workers_.push_back(i);
+    }
   }
-  president_id_ = 0;
 
   // Init neural network
   std::vector<int> v;
@@ -151,6 +158,12 @@ void Process::send_weights(int dest)
   MPI_Send(weights.data(), weights.size(), MPI_DOUBLE, dest, Tag::WeightsMatrix, MPI_COMM_WORLD);
   std::vector<double> biases = serialize(nn_.get_biases());
   MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, dest, Tag::BiasesMatrix, MPI_COMM_WORLD);
+}
+
+void Process::send_weights_all()
+{
+  for (auto& w: workers_)
+    send_weights(w);
 }
 
 void Process::set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases)

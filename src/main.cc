@@ -28,6 +28,7 @@ int main(int argc, char** argv)
   if (p.get_type() == Type::President)
   {
     p.elect_masters();
+    p.send_weights_all();
   }
   
   MPI_Status status;
@@ -78,6 +79,7 @@ int main(int argc, char** argv)
       else // if (p.get_type() == Type::President)
       {
         p.update_nn(w, b);
+        std::cout << "s" << std::endl;
         p.send_weights(status.MPI_SOURCE);
       }
       
