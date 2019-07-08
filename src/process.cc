@@ -4,10 +4,10 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
-Process::Process(int rank, int w_size, const std::string& filename_data,
+Process::Process(int rank, int world_size, const std::string& filename_data,
   const std::string& filename_parameters, double ratio, int nb_epochs)
   : rank_(rank)
-  , w_size_(w_size)
+  , world_size_(world_size)
   , type_(Type::Worker)
   , ratio_(ratio)
   , nb_epochs_(nb_epochs)
@@ -55,7 +55,8 @@ bool Process::has_ended() const
 
 void Process::elect_president()
 {
-  //TODO
+  // TODO
+
   // President election
   if (rank_ == 0)
   {
@@ -63,6 +64,7 @@ void Process::elect_president()
   }
   president_id_ = 0;
 
+  // Init neural network
   if (type_ == Type::President)
   {
     std::vector<int> v;
@@ -78,6 +80,21 @@ void Process::elect_president()
 void Process::elect_masters()
 {
   // TODO
+  // Fill masters_ and workers_ with their ranks
+}
+
+void Process::send_weights_dimensions()
+{
+  auto weights = nn_.get_weights();
+
+  for (auto rank_worker: workers_)
+  {
+    std::vector<int> v;
+    v.push_back(weights.size());
+    for 
+
+    MPI_Send(&number, 1, MPI_INT, rank_worker, Tag::WeightsDimensions, MPI_COMM_WORLD);
+  }
 }
 
 void Process::init_datas(const std::string& filename_data)
