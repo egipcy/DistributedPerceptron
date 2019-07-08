@@ -5,12 +5,10 @@
 #include <boost/algorithm/string.hpp>
 
 Process::Process(int rank, int world_size, const std::string& filename_data,
-  const std::string& filename_parameters, double ratio, int nb_epochs)
+  const std::string& filename_parameters)
   : rank_(rank)
   , world_size_(world_size)
   , type_(Type::Worker)
-  , ratio_(ratio)
-  , nb_epochs_(nb_epochs)
   , alive_(true)
   , has_ended_(false)
 {
@@ -51,6 +49,11 @@ void Process::set_alive(bool alive)
 bool Process::has_ended() const
 {
   return has_ended_;
+}
+
+void Process::set_ended(bool ended)
+{
+  has_ended_ = ended;
 }
 
 void Process::elect_president()
@@ -147,6 +150,10 @@ void Process::init_parameters(const std::string& filename_parameters)
       parameters_.nb_hidden_neurons = std::stoi(value);
     else if (param == "learning_rate")
       parameters_.learning_rate = std::stod(value);
+    else if (param == "nb_epochs")
+      parameters_.nb_epochs = std::stoi(value);
+    else if (param == "ratio")
+      parameters_.ratio = std::stod(value);
     else
       std::cerr << "Unknown parameter: " << param << std::endl;
   }
@@ -179,4 +186,6 @@ std::pair<std::vector<Matrix>, std::vector<Matrix>> get_gradients()
 void Process::update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b)
 {
   nn_.update_simple(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate);
+  if (++i_epoch == parameters_.nb_epochs)
+    has_ended_ = true;
 }
