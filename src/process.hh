@@ -22,7 +22,7 @@ enum class Type
 enum class Tag
 {
   WeightsDimensions = 1,
-  SendWeights = 2
+  WeightsMatrix = 2
 };
 
 class Process
