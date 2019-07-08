@@ -247,7 +247,8 @@ Matrix operator*(double n, const Matrix& other)
 {
   return other * n;
 }
-  std::vector<double> flatten(std::vector<std::vector<double>> vect)
+
+std::vector<double> flatten(std::vector<std::vector<double>> vect)
 {
   std::vector<double> flatten(std::begin(vect[0]),std::end(vect[0]));
   for (int i = 1; i < vect.size();i++)
@@ -274,17 +275,17 @@ std::vector<double> serialize(std::vector<Matrix> vect)
   return res;
 }
 
- std::vector<Matrix> deserialize(std::vector<double> vect)
+std::vector<Matrix> deserialize(std::vector<double> vect)
 {
   std::vector<Matrix> res;
   int old_pos = 0;
   int nb_matrix = vect[vect.size()-1];
 
   for(int nb = 0;nb< nb_matrix; nb++)
-   {
-     std::vector<std::vector<double>> mat;
-     int col = vect[vect.size()-1 -(2*nb_matrix) + nb];
-     int rows = vect[vect.size()  -nb_matrix +nb];
+  {
+    std::vector<std::vector<double>> mat;
+    int col = vect[vect.size()-1 -(2*nb_matrix) + nb];
+    int rows = vect[vect.size()  -nb_matrix +nb];
     int elts = col * rows; 
     std::vector<double> tmp;
     for(int i = 0; i < elts; i++)
@@ -299,6 +300,6 @@ std::vector<double> serialize(std::vector<Matrix> vect)
     mat.push_back(tmp);
     old_pos+=elts;
     res.push_back(Matrix(mat));
-   }
+  }
  return res;
 }

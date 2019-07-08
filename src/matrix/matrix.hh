@@ -43,9 +43,6 @@ public:
   std::vector<double> to_vect() const;
 
   void print() const;
-
-friend std::vector<Matrix> deserialize(std::vector<double> vect);
-friend std::vector<double> serialize(std::vector<Matrix> Matrix);
  
 private:
   std::vector<std::vector<double>> mat_;
@@ -56,3 +53,6 @@ private:
 Matrix operator+(double n, const Matrix& other);
 Matrix operator-(double n, const Matrix& other);
 Matrix operator*(double n, const Matrix& other);
+
+std::vector<Matrix> deserialize(std::vector<double> vect);
+std::vector<double> serialize(std::vector<Matrix> Matrix);
