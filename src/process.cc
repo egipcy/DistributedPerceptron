@@ -51,9 +51,9 @@ bool Process::has_ended() const
   return has_ended_;
 }
 
-void Process::set_ended(bool ended)
+void Process::end()
 {
-  has_ended_ = ended;
+  has_ended_ = true;
 }
 
 void Process::elect_president()

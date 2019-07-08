@@ -44,7 +44,7 @@ public:
   void set_alive(bool alive);
 
   bool has_ended() const;
-  void set_ended(bool ended);
+  void end();
 
   void elect_president();
   void elect_masters();
