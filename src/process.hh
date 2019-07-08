@@ -54,7 +54,6 @@ private:
   int rank_;
   int world_size_;
   int president_id_;
-  std::vector<Matrix> weights_;
   std::vector<int> masters_;
   std::vector<int> workers_;
 

@@ -84,7 +84,7 @@ void Process::init_datas(const std::string& filename_data)
 {
   /*
   ** open file
-  ** for each line, split separators (,;)
+  ** for each line, split separators (,)
   ** n-1 first values goes in X (matrix aka vector of vectors)
   ** last value goes in y (matrix aka vector of double)
   ** update datas_
