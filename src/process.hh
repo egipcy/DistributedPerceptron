@@ -21,7 +21,8 @@ enum class Type
 
 enum Tag
 {
-  WeightsMatrix = 1
+  WeightsMatrix = 1,
+  BiasesMatrix
 };
 
 class Process
@@ -46,8 +47,8 @@ public:
   void elect_masters();
 
   /* Communication */
-  void send_weights(int dest, int tag);
-  void set_weights(std::vector<double> w)
+  void send_weights(int dest);
+  void set_weights_biases(std::vector<double> weights, std::vector<double> biases);
 
 private:
   int rank_;
