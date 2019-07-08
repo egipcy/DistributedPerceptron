@@ -279,16 +279,16 @@ std::vector<Matrix> deserialize(std::vector<double> vect)
 {
   std::vector<Matrix> res;
   int old_pos = 0;
-  int nb_matrix = vect[vect.size()-1];
+  int nb_matrix = vect[vect.size() - 1];
 
-  for(int nb = 0;nb< nb_matrix; nb++)
+  for (int nb = 0; nb < nb_matrix; nb++)
   {
     std::vector<std::vector<double>> mat;
-    int col = vect[vect.size()-1 -(2*nb_matrix) + nb];
-    int rows = vect[vect.size()  -nb_matrix +nb];
+    int col = vect[vect.size() - 1 - (2 * nb_matrix) + nb];
+    int rows = vect[vect.size() - 1 - nb_matrix + nb];
     int elts = col * rows; 
     std::vector<double> tmp;
-    for(int i = 0; i < elts; i++)
+    for (int i = 0; i < elts; i++)
     {
       if(i > 0 && i % col == 0)
       {

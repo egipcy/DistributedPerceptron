@@ -43,7 +43,7 @@ const std::vector<Matrix>& NN::get_biases() const
 
 std::pair<Matrix, std::vector<Matrix>> NN::forward(const Matrix& inputs)
 {
-  assert(inputs.columns() == weights_[0].columns());
+  assert(inputs.columns() == weights_[0].rows());
 
   std::vector<Matrix> weighted_sums;
   Matrix activated_sum(inputs);
