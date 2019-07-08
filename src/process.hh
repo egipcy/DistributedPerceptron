@@ -41,6 +41,10 @@ public:
   void elect_masters();
   void send_ranges();
 
+  /* Communication */
+  void send_weights(int dest, int tag);
+  void set_weights(std::vector<double> w)
+
 private:
   int rank_;
   int w_size_;

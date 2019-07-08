@@ -155,3 +155,14 @@ void Process::init_parameters(const std::string& filename_parameters)
       std::cerr << "Unknown parameter: " << param << std::endl;
   }
 }
+
+void Process::send_weights(int dest, int tag)
+{
+  std::vector<double> sw = serialiaze(weights_);
+  MPI_Send(sw.data, sw.size(), MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
+}
+
+void set_weights(std::vector<double> w)
+{
+  weights_ = deserialize(w);
+}
