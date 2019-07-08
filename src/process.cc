@@ -162,3 +162,8 @@ std::pair<std::vector<Matrix>, std::vector<Matrix>> get_gradients()
 {
   return nn_.backpropagation(datas_.first, datas_.second);
 }
+
+void Process::update_nn(const std::vector<Matrix>& gradients_w, const std::vector<Matrix>& gradients_b)
+{
+  nn_.update_simple(gradients_w, gradients_b, parameters_.learning_rate);
+}
