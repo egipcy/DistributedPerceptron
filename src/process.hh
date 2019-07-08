@@ -50,6 +50,8 @@ public:
   void send_weights(int dest);
   void set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases);
 
+  std::pair<std::vector<Matrix>, std::vector<Matrix>> get_gradients();
+
 private:
   int rank_;
   int world_size_;

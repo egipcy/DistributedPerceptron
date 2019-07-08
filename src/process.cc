@@ -157,3 +157,8 @@ void Process::set_weights_biases(const std::vector<double>& weights, const std::
 {
   nn_ = NN(deserialize(weights), deserialize(biases));
 }
+
+std::pair<std::vector<Matrix>, std::vector<Matrix>> get_gradients()
+{
+  return nn_.backpropagation(datas_.first, datas_.second);
+}
