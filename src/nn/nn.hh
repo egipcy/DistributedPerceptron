@@ -12,6 +12,7 @@ public:
   NN(const std::vector<int>& nb_neurons);
 
   const std::vector<Matrix>& get_weights() const;
+  const std::vector<Matrix>& get_biases() const;
 
   std::pair<Matrix, std::vector<Matrix>> forward(const Matrix& inputs);
 

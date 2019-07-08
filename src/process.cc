@@ -145,13 +145,15 @@ void Process::init_parameters(const std::string& filename_parameters)
   }
 }
 
-void Process::send_weights(int dest, int tag)
+void Process::send_weights(int dest)
 {
-  std::vector<double> sw = serialiaze(weights_);
-  MPI_Send(sw.data, sw.size(), MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
+  std::vector<double> weights = serialize(nn_.get_weights());
+  MPI_Send(weights.data(), weights.size(), MPI_DOUBLE, dest, Tag::WeightsMatrix, MPI_COMM_WORLD);
+  std::vector<double> biases = serialize(nn_.get_biases());
+  MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, dest, Tag::BiasesMatrix, MPI_COMM_WORLD);
 }
 
-void set_weights(std::vector<double> w)
+void Process::set_weights_biases(std::vector<double> weights, std::vector<double> biases)
 {
-  weights_ = deserialize(w);
+  nn_ = NN(deserialize(weights), deserialize(biases));
 }
