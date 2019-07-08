@@ -10,7 +10,7 @@
 
 int main(int argc, char** argv)
 {
-  if (argc != __ARGC__)
+  if (argc != 3)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
     std::cerr << "Arguments : data's path, config's path";
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
       if(p.get_type() == Type::Worker)
       {
         p.set_weights_biases(w, b);
-        std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradients(); //weights, biases
+        std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradients(); // weights, biases
         auto g_weights = serialize(g.first);
         auto g_biases = serialize(g.second);
         MPI_Send(g_weights.data(), g_weights.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD);
@@ -78,10 +78,10 @@ int main(int argc, char** argv)
       }
       else // if (p.get_type() == Type::President)
       {
-        bool ended = p.update_nn(w, b);
-        if (ended)
+        p.update_nn(w, b);
+        if (p.has_ended())
         {
-          p.end_all(); //send the tag Finished to everybody
+          p.end_all(); // send the tag Finished to everybody
           std::cout << "Ended with success" << std::endl;
         }
         std::cout << "s" << std::endl;
@@ -93,4 +93,7 @@ int main(int argc, char** argv)
       p.end();
     }
   }
+
+  MPI_Finalize();
+  return 0;
 }

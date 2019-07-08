@@ -56,6 +56,15 @@ void Process::end()
   has_ended_ = true;
 }
 
+void Process::end_all() const
+{
+  int n = 0;
+  for (auto w: workers_)
+    MPI_Send(&n, 1, MPI_INT, w, Tag::Finished, MPI_COMM_WORLD);
+  for (auto m: masters_)
+    MPI_Send(&n, 1, MPI_INT, m, Tag::Finished, MPI_COMM_WORLD);
+}
+
 void Process::elect_president()
 {
   // TODO

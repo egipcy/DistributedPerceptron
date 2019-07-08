@@ -46,6 +46,7 @@ public:
 
   bool has_ended() const;
   void end();
+  void end_all() const;
 
   void elect_president();
   void elect_masters();
