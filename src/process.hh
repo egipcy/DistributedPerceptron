@@ -19,10 +19,15 @@ enum class Type
   Worker
 };
 
+enum class Tag
+{
+  WeightsDimensions = 1
+};
+
 class Process
 {
 public:
-  Process(int rank, int w_size, const std::string& filename_data,
+  Process(int rank, int world_size, const std::string& filename_data,
     const std::string& filename_parameters, double ratio, int nb_epochs);
 
   int get_rank() const;
@@ -39,7 +44,7 @@ public:
 
   void elect_president();
   void elect_masters();
-  void send_ranges();
+  void send_weights_dimensions();
 
   /* Communication */
   void send_weights(int dest, int tag);
@@ -47,9 +52,10 @@ public:
 
 private:
   int rank_;
-  int w_size_;
+  int world_size_;
   int president_id_;
   std::vector<int> masters_;
+  std::vector<int> workers_;
 
   Type type_;
   double ratio_;
@@ -59,8 +65,6 @@ private:
 
   std::pair<Matrix, Matrix> datas_;
   void init_datas(const std::string& filename_data);
-
-  std::pair<int, int> range_;
 
   bool alive_;
   bool has_ended_;

@@ -18,17 +18,17 @@ int main(int argc, char** argv)
   }
 
   MPI_Init(&argc, &argv);
-  int rank, w_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &w_size);
+  int rank, world_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  Process p = Process(rank, w_size, argv[1], argv[2], std::stod(argv[3]), std::stoi(argv[4]));
+  Process p = Process(rank, world_size, argv[1], argv[2], std::stod(argv[3]), std::stoi(argv[4]));
   p.elect_president();
 
   if (p.get_type() == Type::President)
   {
     p.elect_masters();
-    p.send_ranges();
+    p.send_weights_dimensions();
   }
   
   MPI_Status status;
@@ -37,7 +37,8 @@ int main(int argc, char** argv)
   {
     MPI_Status status;
     int flag = false;
-    int recv_number=0;
+    int recv_number = 0;
+
     while (!flag)
     {
       if (p.get_type() == Type::President)
@@ -48,13 +49,15 @@ int main(int argc, char** argv)
       {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
-      else
+      else // p.get_type() == Type::Master
       {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
     }
+
     MPI_Recv(&recv_number,1, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
     int number = 1;
+
     switch(status.MPI_TAG)
     {
       case 1:
@@ -63,8 +66,7 @@ int main(int argc, char** argv)
         break;
       case 2:
         std::cout << "President recieved a response from "
-          << status.MPI_SOURCE
-          << std::endl;
+          << status.MPI_SOURCE << std::endl;
         break;
       default:
         std::cout << "Tag doesn\'t match: " << status.MPI_TAG << " " << status.MPI_SOURCE << std::endl;
