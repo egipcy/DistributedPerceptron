@@ -19,7 +19,7 @@ enum class Type
   Worker
 };
 
-enum class Tag
+enum Tag
 {
   WeightsDimensions = 1,
   WeightsMatrix = 2
