@@ -31,6 +31,16 @@ NN::NN(const std::vector<int>& nb_neurons)
   }
 }
 
+const std::vector<Matrix>& NN::get_weights() const
+{
+  return weights_;
+}
+
+const std::vector<Matrix>& NN::get_biases() const
+{
+  return biases_;
+}
+
 std::pair<Matrix, std::vector<Matrix>> NN::forward(const Matrix& inputs)
 {
   assert(inputs.columns() == weights_[0].columns());

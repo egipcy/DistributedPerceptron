@@ -18,26 +18,24 @@ int main(int argc, char** argv)
   }
 
   MPI_Init(&argc, &argv);
-  int rank, w_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &w_size);
+  int rank, world_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  Process p = Process(rank, w_size, argv[1], argv[2], std::stod(argv[3]), std::stoi(argv[4]));
+  Process p = Process(rank, world_size, argv[1], argv[2], std::stod(argv[3]), std::stoi(argv[4]));
   p.elect_president();
 
   if (p.get_type() == Type::President)
   {
     p.elect_masters();
-    p.send_ranges();
+    p.send_weights_all();
   }
   
   MPI_Status status;
-  int number_amount;
+  int count;
   while (!p.has_ended())
   {
-    MPI_Status status;
     int flag = false;
-    int recv_number=0;
     while (!flag)
     {
       if (p.get_type() == Type::President)
@@ -48,26 +46,43 @@ int main(int argc, char** argv)
       {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
-      else
+      else // p.get_type() == Type::Master
       {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
     }
-    MPI_Recv(&recv_number,1, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-    int number = 1;
-    switch(status.MPI_TAG)
+
+    int t = status.MPI_TAG;
+    if (t == Tag::WeightsMatrix)
     {
-      case 1:
-        std::cout << rank << std::endl;
-        MPI_Send(&number, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
-        break;
-      case 2:
-        std::cout << "President recieved a response from "
-          << status.MPI_SOURCE
-          << std::endl;
-        break;
-      default:
-        std::cout << "Tag doesn\'t match: " << status.MPI_TAG << " " << status.MPI_SOURCE << std::endl;
+      // w and b are weights and biases if p is a worker or master
+      // but are gradients if p is a president
+      MPI_Get_count(&status, MPI_DOUBLE, &count);
+      std::vector<double> w(count);
+      MPI_Recv(w.data(), count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+      std::vector<double> b(count);
+      MPI_Recv(b.data(), count, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
+
+      if(p.get_type() == Type::Worker)
+      {
+        p.set_weights_biases(w, b);
+        std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradient(); //weights, biases
+        auto g_weights = serialize(g.first);
+        auto g_biases = serialize(g.second);
+        MPI_Send(g_weights.data(), g_weights.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD);
+        MPI_Send(g_biases.data(), g_biases.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD);
+      }
+      else if (p.get_type() == Type::Master)
+      {
+        p.set_weights_biases(w, b);
+      }
+      else // if (p.get_type() == Type::President)
+      {
+        p.update_nn(w, b);
+        std::cout << "s" << std::endl;
+        p.send_weights(status.MPI_SOURCE);
+      }
+      
     }
   }
 }

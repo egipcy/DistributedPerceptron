@@ -4,10 +4,10 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
-Process::Process(int rank, int w_size, const std::string& filename_data,
+Process::Process(int rank, int world_size, const std::string& filename_data,
   const std::string& filename_parameters, double ratio, int nb_epochs)
   : rank_(rank)
-  , w_size_(w_size)
+  , world_size_(world_size)
   , type_(Type::Worker)
   , ratio_(ratio)
   , nb_epochs_(nb_epochs)
@@ -55,47 +55,43 @@ bool Process::has_ended() const
 
 void Process::elect_president()
 {
-  //TODO
+  // TODO
+
   // President election
-  if (rank_ == 0)
-  {
-    type_ = Type::President;
-  }
   president_id_ = 0;
 
-  if (type_ == Type::President)
+  if (rank_ == president_id_)
   {
-    std::vector<int> v;
-    v.push_back(datas_.first.columns());
-    for (int i = 0; i < parameters_.nb_hidden_layers; i++)
-      v.push_back(parameters_.nb_hidden_neurons);
-    v.push_back(datas_.second.columns());
-
-    nn_ = NN(v);
+    type_ = Type::President;
+    for (int i = 0; i < world_size_; i++)
+    {
+      if (i == president_id_)
+        continue;
+      workers_.push_back(i);
+    }
   }
+
+  // Init neural network
+  std::vector<int> v;
+  v.push_back(datas_.first.columns());
+  for (int i = 0; i < parameters_.nb_hidden_layers; i++)
+    v.push_back(parameters_.nb_hidden_neurons);
+  v.push_back(datas_.second.columns());
+
+  nn_ = NN(v);
 }
 
 void Process::elect_masters()
 {
   // TODO
-}
-
-void Process::send_ranges()
-{
-  // TODO
-
-  for (int i = 1; i < w_size_; i++)
-  {
-    int number = 0;
-    MPI_Send(&number, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
-  }
+  // Fill masters_ and workers_ with their ranks
 }
 
 void Process::init_datas(const std::string& filename_data)
 {
   /*
   ** open file
-  ** for each line, split separators (,;)
+  ** for each line, split separators (,)
   ** n-1 first values goes in X (matrix aka vector of vectors)
   ** last value goes in y (matrix aka vector of double)
   ** update datas_
@@ -154,4 +150,33 @@ void Process::init_parameters(const std::string& filename_parameters)
     else
       std::cerr << "Unknown parameter: " << param << std::endl;
   }
+}
+
+void Process::send_weights(int dest)
+{
+  std::vector<double> weights = serialize(nn_.get_weights());
+  MPI_Send(weights.data(), weights.size(), MPI_DOUBLE, dest, Tag::WeightsMatrix, MPI_COMM_WORLD);
+  std::vector<double> biases = serialize(nn_.get_biases());
+  MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, dest, Tag::BiasesMatrix, MPI_COMM_WORLD);
+}
+
+void Process::send_weights_all()
+{
+  for (auto& w: workers_)
+    send_weights(w);
+}
+
+void Process::set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases)
+{
+  nn_ = NN(deserialize(weights), deserialize(biases));
+}
+
+std::pair<std::vector<Matrix>, std::vector<Matrix>> get_gradients()
+{
+  return nn_.backpropagation(datas_.first, datas_.second);
+}
+
+void Process::update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b)
+{
+  nn_.update_simple(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate);
 }
