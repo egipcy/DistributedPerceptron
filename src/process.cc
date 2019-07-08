@@ -84,7 +84,7 @@ void Process::init_datas(const std::string& filename_data)
 {
   /*
   ** open file
-  ** for each line, split separators (,;)
+  ** for each line, split separators (,)
   ** n-1 first values goes in X (matrix aka vector of vectors)
   ** last value goes in y (matrix aka vector of double)
   ** update datas_
@@ -153,7 +153,7 @@ void Process::send_weights(int dest)
   MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, dest, Tag::BiasesMatrix, MPI_COMM_WORLD);
 }
 
-void Process::set_weights_biases(std::vector<double> weights, std::vector<double> biases)
+void Process::set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases)
 {
   nn_ = NN(deserialize(weights), deserialize(biases));
 }

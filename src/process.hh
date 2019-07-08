@@ -48,13 +48,12 @@ public:
 
   /* Communication */
   void send_weights(int dest);
-  void set_weights_biases(std::vector<double> weights, std::vector<double> biases);
+  void set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases);
 
 private:
   int rank_;
   int world_size_;
   int president_id_;
-  std::vector<Matrix> weights_;
   std::vector<int> masters_;
   std::vector<int> workers_;
 
