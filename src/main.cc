@@ -2,8 +2,6 @@
 #include <ctime>
 #include "mpi.h"
 
-#include "header.hh"
-
 #include "process.hh"
 #include "matrix/matrix.hh"
 
