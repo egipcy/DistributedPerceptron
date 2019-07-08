@@ -10,6 +10,8 @@ struct Parameters
   int nb_hidden_layers = 2;
   int nb_hidden_neurons = 10;
   double learning_rate = 0.01;
+  int nb_epochs = 1000;
+  double ratio = 0.3;
 };
 
 enum class Type
@@ -22,14 +24,15 @@ enum class Type
 enum Tag
 {
   WeightsMatrix = 1,
-  BiasesMatrix
+  BiasesMatrix,
+  Finished
 };
 
 class Process
 {
 public:
   Process(int rank, int world_size, const std::string& filename_data,
-    const std::string& filename_parameters, double ratio, int nb_epochs);
+    const std::string& filename_parameters);
 
   int get_rank() const;
 
@@ -42,6 +45,8 @@ public:
   void set_alive(bool alive);
 
   bool has_ended() const;
+  void end();
+  void end_all() const;
 
   void elect_president();
   void elect_masters();
@@ -61,10 +66,9 @@ private:
   std::vector<int> workers_;
 
   Type type_;
-  double ratio_;
 
   NN nn_;
-  int nb_epochs_;
+  int i_epoch;
 
   std::pair<Matrix, Matrix> datas_;
   void init_datas(const std::string& filename_data);
