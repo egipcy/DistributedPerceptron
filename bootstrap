@@ -1,0 +1,16 @@
+#!/bin/sh
+dirname="build"
+
+if [ ! -d "$dirname" ]
+then
+    if [ !  -L "$dirname" ]
+    then
+        mkdir -p -- "$dirname"
+    fi
+fi
+cd "$dirname"
+cmake ..
+make
+mv DistributedPerceptron ..
+cd ..
+mpirun -np 5 -hostfile hostfile DistributedPerceptron train.csv CONFIG
