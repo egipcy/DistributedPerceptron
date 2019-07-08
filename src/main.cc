@@ -57,7 +57,14 @@ int main(int argc, char** argv)
       MPI_Get_count(&status, MPI_DOUBLE, &count);
       std::vector<double> w(count);
       MPI_Recv(w.data(), count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-      p.set_weights(w);
+      std::vector<double> b(count);
+      MPI_Recv(b.data(), count, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
+      p.set_weights_biases(w, b);
+      std::pair<Matrix, Matrix> g = p.get_gradient(); //weights, biases
+      auto weights = serialize(g.first);
+      auto biases = serialize(g.second);
+      MPI_Send(weights.data(), weights.size(), MPI_DOUBLE, status.MPI_SOURCE, t, MPI_COMM_WORLD);
+      MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, status.MPI_SOURCE, t, MPI_COMM_WORLD);
       break;
     }
   }
