@@ -54,18 +54,32 @@ int main(int argc, char** argv)
     int t = status.MPI_TAG;
     if (t == Tag::WeightsMatrix)
     {
+      // w and b are weights and biases if p is a worker or master
+      // but are gradients if p is a president
       MPI_Get_count(&status, MPI_DOUBLE, &count);
       std::vector<double> w(count);
       MPI_Recv(w.data(), count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
       std::vector<double> b(count);
       MPI_Recv(b.data(), count, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
-      p.set_weights_biases(w, b);
-      std::pair<Matrix, Matrix> g = p.get_gradient(); //weights, biases
-      auto weights = serialize(g.first);
-      auto biases = serialize(g.second);
-      MPI_Send(weights.data(), weights.size(), MPI_DOUBLE, status.MPI_SOURCE, t, MPI_COMM_WORLD);
-      MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, status.MPI_SOURCE, t, MPI_COMM_WORLD);
-      break;
+
+      if(p.get_type() == Type::Worker)
+      {
+        p.set_weights_biases(w, b);
+        std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradient(); //weights, biases
+        auto g_weights = serialize(g.first);
+        auto g_biases = serialize(g.second);
+        MPI_Send(g_weights.data(), g_weights.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD);
+        MPI_Send(g_biases.data(), g_biases.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD);
+      }
+      else if (p.get_type() == Type::Master)
+      {
+        p.set_weights_biases(w, b);
+      }
+      else // if (p.get_type() == Type::President)
+      {
+        p.update_nn(w, b);
+      }
+      
     }
   }
 }
