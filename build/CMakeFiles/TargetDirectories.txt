@@ -1,0 +1,3 @@
+/home/tevdoradze/Documents/scia/algorep/DistributedPerceptron/build/CMakeFiles/rebuild_cache.dir
+/home/tevdoradze/Documents/scia/algorep/DistributedPerceptron/build/CMakeFiles/DistributedPerceptron.dir
+/home/tevdoradze/Documents/scia/algorep/DistributedPerceptron/build/CMakeFiles/edit_cache.dir
