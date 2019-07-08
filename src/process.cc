@@ -153,7 +153,7 @@ void Process::send_weights(int dest)
   MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, dest, Tag::BiasesMatrix, MPI_COMM_WORLD);
 }
 
-void Process::set_weights_biases(std::vector<double> weights, std::vector<double> biases)
+void Process::set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases)
 {
   nn_ = NN(deserialize(weights), deserialize(biases));
 }
