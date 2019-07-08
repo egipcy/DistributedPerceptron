@@ -19,9 +19,10 @@ enum class Type
   Worker
 };
 
-enum class Tag
+enum Tag
 {
-  WeightsDimensions = 1
+  WeightsDimensions = 1,
+  WeightsMatrix = 2
 };
 
 class Process
@@ -47,10 +48,15 @@ public:
   void send_weights_dimensions() const;
   void receive_weights_dimensions();
 
+  /* Communication */
+  void send_weights(int dest, int tag);
+  void set_weights(std::vector<double> w)
+
 private:
   int rank_;
   int world_size_;
   int president_id_;
+  std::vector<Matrix> weights_;
   std::vector<int> masters_;
   std::vector<int> workers_;
 

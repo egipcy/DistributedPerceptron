@@ -32,13 +32,10 @@ int main(int argc, char** argv)
   }
   
   MPI_Status status;
-  int number_amount;
+  int count;
   while (!p.has_ended())
   {
-    MPI_Status status;
     int flag = false;
-    int recv_number = 0;
-
     while (!flag)
     {
       if (p.get_type() == Type::President)
@@ -55,19 +52,13 @@ int main(int argc, char** argv)
       }
     }
 
-    MPI_Recv(&recv_number,1, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-    int number = 1;
-
     switch (status.MPI_TAG)
     {
       case Tag::WeightsDimensions:
-        // TODO
-        std::vector<int> weights_dimensions;
-        p.receive_weights_dimensions(weights_dimensions);
-        break;
-      case 1:
-        std::cout << rank << std::endl;
-        MPI_Send(&number, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
+        MPI_Get_count(&status, MPI_INT, &count);
+        std::vector<int> dimensions(count);
+        MPI_Recv(dimensions.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+        p.receive_weights_dimensions(dimensions);
         break;
       case 2:
         std::cout << "President recieved a response from "
