@@ -83,18 +83,21 @@ void Process::elect_masters()
   // Fill masters_ and workers_ with their ranks
 }
 
-void Process::send_weights_dimensions()
+void Process::send_weights_dimensions() const
 {
-  auto weights = nn_.get_weights();
+  std::vector<int> dimensions;
+  dimensions.push_back(datas_.first.columns());
+  for (int i = 0; i < parameters_.nb_hidden_layers; i++)
+    dimensions.push_back(parameters_.nb_hidden_neurons);
+  dimensions.push_back(datas_.second.columns());
 
   for (auto rank_worker: workers_)
-  {
-    std::vector<int> v;
-    v.push_back(weights.size());
-    for 
+    MPI_Send(dimensions.data(), dimensions.size(), MPI_INT, rank_worker, Tag::WeightsDimensions, MPI_COMM_WORLD);
+}
 
-    MPI_Send(&number, 1, MPI_INT, rank_worker, Tag::WeightsDimensions, MPI_COMM_WORLD);
-  }
+void Process::receive_weights_dimensions(const std::vector<int>& weights_dimensions)
+{
+  nn_ = NN(weights_dimensions);
 }
 
 void Process::init_datas(const std::string& filename_data)

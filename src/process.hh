@@ -44,7 +44,8 @@ public:
 
   void elect_president();
   void elect_masters();
-  void send_weights_dimensions();
+  void send_weights_dimensions() const;
+  void receive_weights_dimensions();
 
 private:
   int rank_;

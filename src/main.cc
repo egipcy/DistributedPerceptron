@@ -58,8 +58,13 @@ int main(int argc, char** argv)
     MPI_Recv(&recv_number,1, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
     int number = 1;
 
-    switch(status.MPI_TAG)
+    switch (status.MPI_TAG)
     {
+      case Tag::WeightsDimensions:
+        // TODO
+        std::vector<int> weights_dimensions;
+        p.receive_weights_dimensions(weights_dimensions);
+        break;
       case 1:
         std::cout << rank << std::endl;
         MPI_Send(&number, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
