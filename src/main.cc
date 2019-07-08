@@ -28,7 +28,6 @@ int main(int argc, char** argv)
   if (p.get_type() == Type::President)
   {
     p.elect_masters();
-    p.send_weights_dimensions();
   }
   
   MPI_Status status;
@@ -52,14 +51,14 @@ int main(int argc, char** argv)
       }
     }
 
-    switch (status.MPI_TAG)
+    int t = status.MPI_TAG;
+    if (t == Tag::WeightsMatrix)
     {
-      case 2:
-        std::cout << "President recieved a response from "
-          << status.MPI_SOURCE << std::endl;
-        break;
-      default:
-        std::cout << "Tag doesn\'t match: " << status.MPI_TAG << " " << status.MPI_SOURCE << std::endl;
+      MPI_Get_count(&status, MPI_DOUBLE, &count);
+      std::vector<double> w(count);
+      MPI_Recv(w.data(), count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+      p.set_weights(w);
+      break;
     }
   }
 }
