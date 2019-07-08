@@ -50,10 +50,9 @@ std::pair<Matrix, std::vector<Matrix>> NN::forward(const Matrix& inputs)
 
   for (size_t i_layer = 0; i_layer < weights_.size(); i_layer++)
   {
-    weighted_sums.emplace_back(activated_sum.dot(weights_[i_layer]) + biases_[i_layer][0][0]);
+    weighted_sums.emplace_back(activated_sum.dot(weights_[i_layer])/* + biases_[i_layer][0][0]*/);
     activated_sum = weighted_sums[i_layer].map(NN::activation_function);
   }
-
   return std::pair(activated_sum, weighted_sums);
 }
 

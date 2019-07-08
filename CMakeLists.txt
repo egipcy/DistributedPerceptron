@@ -8,8 +8,8 @@ include_directories(${MPI_INCLUDE_PATH})
 
 set(CMAKE_CXX_STANDARD 17)
 set(MPI_CXX_COMPILER "mpic++")
-set(MPI_CXX_COMPILE_OPTIONS "-std =c++17")
-set(MPI_CXX_LINK_FLAGS "-std=c++17")
+set(MPI_CXX_COMPILE_OPTIONS "-g -std =c++17")
+set(MPI_CXX_LINK_FLAGS "-g -std=c++17")
 
 set (SRC
     src/main.cc
