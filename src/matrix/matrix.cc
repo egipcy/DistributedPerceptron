@@ -247,36 +247,7 @@ Matrix operator*(double n, const Matrix& other)
 {
   return other * n;
 }
-/* std::vector<Matrix> Deserialize(std::vector<double> vect)
-{
-  std::vector<Matrix> Matrixes;
-  int old_pos = 0;
-  int nb_matrix = vect[vect.size()-1];
-
-  for(int nb = 0;nb< nb_matrix; nb++)
-   {
-     std::vector<std::vector<double>> matrix;
-     int col = vect[vect.size()-(2*nb_matrix)-1];
-     int rows = vect[vect.size()-nb_matrix];
-    int elts = col * rows; 
-    std::vector<double> tmp;
-    for(int i = 0; i < elts; i++)
-    {
-      if(i % col == 0)
-      {
-        matrix.push_back(tmp);
-        tmp.clear();
-      }
-
-      tmp.push_back(vect[old_pos + i]);
-    }
-    old_pos+=elts;
-    Matrixes.push_back(matrix);
-   }
- return Matrixes;
-}
-
-std::vector<double> flatten(std::vector<std::vector<double>> vect)
+  std::vector<double> flatten(std::vector<std::vector<double>> vect)
 {
   std::vector<double> flatten(std::begin(vect[0]),std::end(vect[0]));
   for (int i = 1; i < vect.size();i++)
@@ -285,20 +256,49 @@ std::vector<double> flatten(std::vector<std::vector<double>> vect)
   return flatten;
 }
 
- std::vector<double> Serialize(std::vector<Matrix> Matrix)
+std::vector<double> serialize(std::vector<Matrix> vect)
 {
   std::vector<double> res;
-  for(int i =0; i< Matrix.size(); i++)
+  for(int i =0; i< vect.size(); i++)
   {
-    auto tmp = flatten(Matrix[i].mat());
+    auto tmp = flatten(vect[i].mat());
     res.insert(std::end(res), std::begin(tmp), std::end(tmp));
-  }
-  for(int i = 0; i < Matrix.size();i++)
-    res.push_back(Matrix[i].columns());    
+  } 
+  for(int i = 0; i < vect.size();i++)
+    res.push_back(vect[i].columns());    
  
-  for(int i = 0; i < Matrix.size();i++)
-    res.push_back(Matrix[i].rows());
+  for(int i = 0; i < vect.size();i++)
+    res.push_back(vect[i].rows());
 
-  res.push_back(Matrix.size());
+  res.push_back(vect.size());
   return res;
-}*/
+}
+
+ std::vector<Matrix> deserialize(std::vector<double> vect)
+{
+  std::vector<Matrix> res;
+  int old_pos = 0;
+  int nb_matrix = vect[vect.size()-1];
+
+  for(int nb = 0;nb< nb_matrix; nb++)
+   {
+     std::vector<std::vector<double>> mat;
+     int col = vect[vect.size()-1 -(2*nb_matrix) + nb];
+     int rows = vect[vect.size()  -nb_matrix +nb];
+    int elts = col * rows; 
+    std::vector<double> tmp;
+    for(int i = 0; i < elts; i++)
+    {
+      if(i > 0 && i % col == 0)
+      {
+        mat.push_back(tmp);
+        tmp.clear();
+      }
+      tmp.push_back(vect[old_pos + i]);
+    }
+    mat.push_back(tmp);
+    old_pos+=elts;
+    res.push_back(Matrix(mat));
+   }
+ return res;
+}
