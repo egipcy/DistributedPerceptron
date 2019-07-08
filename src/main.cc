@@ -78,6 +78,7 @@ int main(int argc, char** argv)
       else // if (p.get_type() == Type::President)
       {
         p.update_nn(w, b);
+        p.send_weights(status.MPI_SOURCE);
       }
       
     }
