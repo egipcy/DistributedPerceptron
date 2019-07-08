@@ -54,14 +54,14 @@ int main(int argc, char** argv)
 
     switch(status.MPI_TAG)
     {
-      case Tag::WeightsDimensions:
-        MPI_Get_count(&status, MPI_INT, &count);
-        std::vector<int> dimensions(count);
-        MPI_Recv(dimensions.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-        p.receive_weights_dimensions(dimensions);
+      case Tag::WeightsMatrix:
+        MPI_Get_count(&status, MPI_DOUBLE, &count);
+        std::vector<double> weights(count);
+        MPI_Recv(weights.data(), count, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+        p.set_weights(weights);
         break;
       case 2:
-        std::cout << "President recieved a response from "
+        std::cout << "President reccompletedcompletedcompletedcompletedieved a response from "
           << status.MPI_SOURCE << std::endl;
         break;
       default:
