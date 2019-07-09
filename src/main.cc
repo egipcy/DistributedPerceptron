@@ -22,10 +22,8 @@ int main(int argc, char** argv)
 
   Process p = Process(rank, world_size, argv[1], argv[2]);
   p.elect_president();
-  std::cout << "Election President Done" << std::endl;
   if (p.get_type() == Type::President)
   {
-  std::cout << "Set the master and send weigts all" << std::endl;
     p.elect_masters();
     p.send_weights_all();
   }
@@ -60,7 +58,7 @@ int main(int argc, char** argv)
       // but are gradients if p is a president
       MPI_Get_count(&status, MPI_DOUBLE, &count_weight);
       std::vector<double> w(count_weight);
-      std::cout << "Recev Count_Weight = " << count_weight << std::endl;
+     // std::cout << "Recev Count_Weight = " << count_weight << std::endl;
       MPI_Recv(w.data(), count_weight, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
 
 
@@ -73,7 +71,7 @@ int main(int argc, char** argv)
 
       MPI_Get_count(&status_biais, MPI_DOUBLE, &count_biais);
       // The get count not receive the good size, need to find the wayt to get the good size;
-       std::cout <<"Recev Count_Biais =" <<  count_biais << std::endl;
+      // std::cout <<"Recev Count_Biais =" <<  count_biais << std::endl;
 
       std::vector<double> b(count_biais);
       MPI_Recv(b.data(), count_biais, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status_biais);
@@ -85,9 +83,9 @@ int main(int argc, char** argv)
         auto g_weights = serialize(g.first);
 
         auto g_biases = serialize(g.second);
-         std::cout << "send: " << g_weights.size() << std::endl;
+        //std::cout << "send: " << g_weights.size() << std::endl;
         MPI_Send(g_weights.data(), g_weights.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD);
-         std::cout << "send: " << g_biases.size() << std::endl;
+        //std::cout << "send: " << g_biases.size() << std::endl;
         MPI_Send(g_biases.data(), g_biases.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD);
       }
       else if (p.get_type() == Type::Master)
@@ -109,7 +107,6 @@ int main(int argc, char** argv)
       p.end();
     }
   }
-
   MPI_Finalize();
   return 0;
 }

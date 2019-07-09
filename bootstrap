@@ -13,4 +13,4 @@ cmake ..
 make
 mv DistributedPerceptron ..
 cd ..
-mpirun -np 3 -hostfile hostfile DistributedPerceptron train.csv CONFIG
+mpirun -np 2 -hostfile hostfile DistributedPerceptron train.csv CONFIG
