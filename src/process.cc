@@ -68,24 +68,13 @@ void Process::end_all() const
 
 void send_to_neighbours(int tag, int rank, int id, int world_size)
 {
-  int destright = rank +1;
-  if(rank +1 > world_size-1)
-    destright = 0;
-  
-  if(destright != rank)
-    MPI_Send(&id,1, MPI_INT,destright,tag,MPI_COMM_WORLD);
-    
-  /* int destleft = rank -1;
-  if(rank -1 < 0)
-    destleft = world_size-1;
-  
-  if(destleft != rank && destleft != destright) // don't send to same guy 
-     MPI_Send(&id,1, MPI_INT,destleft,tag,MPI_COMM_WORLD);*/
+  int destright = (rank + 1) % world_size;
+  MPI_Send(&id,1, MPI_INT,destright,tag,MPI_COMM_WORLD);
 }
-/*MPI_Send(void* data,int count,MPI_Datatype datatype,int destination,int tag, MPI_Comm communicator) */
+
 void Process::elect_president()
 {
-  // TODO
+  /*
   std::cout << "Begin President" << std::endl;
   int tag = Tag::Election;
   int id = rank_;
@@ -93,32 +82,29 @@ void Process::elect_president()
   {
     send_to_neighbours(tag,rank_,id,world_size_);
     MPI_Status status;
-  /*MPI_Recv(void* data,int count, MPI_Datatype datatype, int source, int tag,MPI_Comm communicator, MPI_Status* status) */
     int get_id = rank_;
-    int flag = false;
-    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
-    
+    MPI_Recv(&get_id,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG ,MPI_COMM_WORLD,&status);
     if(status.MPI_TAG == Tag::Endelection || status.MPI_TAG == Tag::Election)
-      {
-        MPI_Recv(&get_id,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG ,MPI_COMM_WORLD,&status);
-        if(get_id == rank_) //I'm the president
-            { 
-              tag = Tag::Endelection;
-              president_id_ = get_id; 
-              send_to_neighbours(tag,rank_,rank_,world_size_);
-              break;
-            }
-        if(status.MPI_TAG == Tag::Endelection) //I'm worker
-          {
-            tag = Tag::Endelection;
-            president_id_ = get_id;
-          }
-        if(get_id > id) //No one was choosen
-              id = get_id;   
+    {
+      if(get_id == rank_) //I'm the president
+      { 
+        tag = Tag::Endelection;
+        president_id_ = get_id; 
+        send_to_neighbours(tag,rank_,rank_,world_size_);
+        break;
       }
+      if(status.MPI_TAG == Tag::Endelection) //I'm worker
+      {
+        tag = Tag::Endelection;
+        president_id_ = get_id;
+      }
+      if(get_id > id) //No one was choosen
+        id = get_id;   
+    }
   } 
+  */
   // President election
-  //president_id_ = 0;
+  president_id_ = 0;
   if (rank_ == president_id_)
   {
     type_ = Type::President;

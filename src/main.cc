@@ -58,30 +58,21 @@ int main(int argc, char** argv)
       // but are gradients if p is a president
       MPI_Get_count(&status, MPI_DOUBLE, &count_weight);
       std::vector<double> w(count_weight);
-     // std::cout << "Recev Count_Weight = " << count_weight << std::endl;
       MPI_Recv(w.data(), count_weight, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-
-
-      MPI_Status status_biais;
-      /*MPI_Probe(int source, int tag, MPI_Comm comm,  MPI_Status* status)*/
-     //std::cout << "Before the Iprobe to get biais size =" << status.MPI_TAG << std::endl;
-      //MPI_Probe(MPI_ANY_SOURCE,Tag::BiasesMatrix,MPI_COMM_WORLD, &status_tmp);
-      MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status_biais);
-      //std::cout << "after the Iprobe to get biais size =" << status_tmp.MPI_TAG << std::endl;
-
-      MPI_Get_count(&status_biais, MPI_DOUBLE, &count_biais);
-      // The get count not receive the good size, need to find the wayt to get the good size;
-      // std::cout <<"Recev Count_Biais =" <<  count_biais << std::endl;
-
+      flag = false;
+      while(!flag)
+      {
+        MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+      }
+      MPI_Get_count(&status, MPI_DOUBLE, &count_biais);
+      //std::cout <<"Recev Count_Biais =" <<  count_biais << std::endl;
       std::vector<double> b(count_biais);
-      MPI_Recv(b.data(), count_biais, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status_biais);
-
+      MPI_Recv(b.data(), count_biais, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
       if(p.get_type() == Type::Worker)
       {
         p.set_weights_biases(w, b);
         std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradients(); // weights, biases
         auto g_weights = serialize(g.first);
-
         auto g_biases = serialize(g.second);
         //std::cout << "send: " << g_weights.size() << std::endl;
         MPI_Send(g_weights.data(), g_weights.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD);
