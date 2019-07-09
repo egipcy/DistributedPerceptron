@@ -104,6 +104,7 @@ void Process::send_token(const int tag, int& electionEnded)
           president_id_ = rank_;
           electionEnded = true;
           type_ == Type::President;
+          MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::Endelection, MPI_COMM_WORLD);
         }
         else
         {
@@ -111,8 +112,9 @@ void Process::send_token(const int tag, int& electionEnded)
             president_id_ = msg;
           flag = 0;
           MPI_Irecv(&msg, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG,MPI_COMM_WORLD, &req);
+          MPI_Test(&req, &flag, &status);
+          MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD);
         }
-        MPI_Send(&msg, 1, MPI_INT, left_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD);
       }
       else if (status.MPI_TAG == Tag::Endelection)
       {
@@ -129,17 +131,36 @@ void Process::send_token(const int tag, int& electionEnded)
   // received Tag::ElectionConfirmation
 }
 
+/**
+ * Sends the rank to the right node
+ * If right is dead, the ring is reconfigurated to exclude the dead node.
+ * If I receive a Tag::Election, I answer with Tag::ElectionConfirmation.
+ * If I receive a Tag::Election from someone that is not my left, I put it's rank as my left.
+ * If I receive a Tag::Election containing my rank, I am the president
+ * and I answer it with Tag::EndElection.
+ * When a node is answered by the right node with Tag::EndElection, there are 2 cases:
+ *  -If my left node isn't the president, I wait a Tag::Election from him and answer with Tag::EndElection
+ *  -If my left node is the president, I send him Tag::EndElection 
+ *    (meaning that everyone in the ring knows that the election is over)
+ * When president receives Tag::EndElection from right, that means that the election is over
+ * and everybody knows that it's the President.
+ */
 void Process::elect_president()
 {
   std::cout << "Begin President" << std::endl;
-  int tag = Tag::Election;
   int electionEnded = false;
   while (!electionEnded)
   {
-    send_token(tag, electionEnded);
+    send_token(Tag::Election, electionEnded);
   }
+
+  int msg;
+  /**
+   * If I'm the president I must wait that my right node sends me an EndElection tag.
+   */
   if (type_ == Type::President)
   {
+    MPI_Recv(&msg,1,MPI_INT,right_id_, Tag::Endelection, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     for (auto& w: workers_)
     {
       if (w == rank_)
@@ -147,6 +168,25 @@ void Process::elect_president()
       MPI_Send(&president_id_,1, MPI_INT, w, Tag::Endelection, MPI_COMM_WORLD);
     }
   }
+  else
+  {
+    /**
+     * if I'm not the president but I received Endelection from right
+     * I must wait a Tag::Election from left and I must answer with Tag::Endelection
+     * However if left is the president, that means that EndElection has been received by
+     * everyone. Thus we can send him a message to tell him to president election is over
+     */
+    if (left_id_ == president_id_) 
+    {
+      MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::Endelection, MPI_COMM_WORLD);
+    }
+    else
+    {
+      MPI_Recv(&msg, 1, MPI_INT, left_id_, Tag::Election, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::Endelection, MPI_COMM_WORLD);
+    }
+  }
+  
 } 
 
 void Process::elect_masters()
