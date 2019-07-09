@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <cassert>
 #include "mpi.h"
 
 #include "process.hh"
@@ -131,7 +132,7 @@ int main(int argc, char** argv)
     }
     else if (t == Tag::UpgradeToMaster)
     {
-      MPI_Get_count(&status, MPI_DOUBLE, &count);
+      MPI_Get_count(&status, MPI_INT, &count);
       std::vector<int> masters(count);
       MPI_Recv(masters.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
       p.upgrade_to_master(masters);

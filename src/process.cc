@@ -133,9 +133,9 @@ void Process::elect_masters()
     workers_start = i;
   }
 
-  for (auto& m: masters_)
+  for (auto m: masters_)
   {
-    MPI_Send(masters_.data(),masters_.size(),MPI_INT,m,Tag::UpgradeToMaster, MPI_COMM_WORLD);
+    MPI_Send(masters_.data(), masters_.size(), MPI_INT, m, Tag::UpgradeToMaster, MPI_COMM_WORLD);
   }
   for (int i = workers_start + 1; i < world_size_; i++)
   {
@@ -239,7 +239,7 @@ void Process::send_weights(int dest)
 
 void Process::send_weights_all()
 {
-  for (auto& w: workers_)
+  for (auto w: workers_)
     send_weights(w);
 }
 
