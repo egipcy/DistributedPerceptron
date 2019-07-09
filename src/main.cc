@@ -120,6 +120,13 @@ int main(int argc, char** argv)
       std::cout << p.get_rank() << " END received" << std::endl;
       p.end();
     }
+    else if (t == Tag::UpgradeToMaster)
+    {
+      MPI_Get_count(&status, MPI_DOUBLE, &count);
+      std::vector<int> masters(count);
+      MPI_Recv(masters.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+      p.upgrade_to_master(masters);
+    }
   }
 
   std::cout << p.get_rank() << " FINISH" << std::endl;

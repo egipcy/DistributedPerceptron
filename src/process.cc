@@ -31,6 +31,13 @@ void Process::set_type(Type type)
   type_ = type;
 }
 
+void Process::upgrade_to_master(std::vector<int> masters)
+{
+  type_ = Type::Master;
+  masters_ = masters;
+}
+
+
 NN& Process::get_nn()
 {
   return nn_;
@@ -124,6 +131,11 @@ void Process::elect_masters()
       continue;
     masters_.push_back(i);
     workers_start = i;
+  }
+
+  for (auto& m: masters_)
+  {
+    MPI_Send(masters_.data(),masters_.size(),MPI_INT,m,Tag::UpgradeToMaster, MPI_COMM_WORLD);
   }
   for (int i = workers_start + 1; i < world_size_; i++)
   {
