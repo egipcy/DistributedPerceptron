@@ -8,6 +8,7 @@
 
 int main(int argc, char** argv)
 {
+  int debug = 0;
   if (argc != 4)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
@@ -69,7 +70,9 @@ int main(int argc, char** argv)
       // but are gradients if p is a president
       MPI_Get_count(&status, MPI_DOUBLE, &count_weight);
       std::vector<double> w(count_weight);
+
       MPI_Recv(w.data(), count_weight, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+
       flag = false;
       while (!flag)
       {
@@ -78,7 +81,11 @@ int main(int argc, char** argv)
       MPI_Get_count(&status, MPI_DOUBLE, &count_biais);
       //std::cout <<"Recev Count_Biais =" <<  count_biais << std::endl;
       std::vector<double> b(count_biais);
+
+      std::cout << p.get_rank() << " " << debug << " BEGIN#" << std::endl;
       MPI_Recv(b.data(), count_biais, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
+      std::cout << p.get_rank() << " " << debug++ << " END#" << std::endl;
+
       if (p.get_type() == Type::Worker)
       {
         std::cout << p.get_rank() << " Worker receive nn" << std::endl;
