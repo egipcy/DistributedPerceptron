@@ -27,7 +27,8 @@ enum Tag
   BiasesMatrix,
   Finished,
   Election,
-  Endelection
+  Endelection,
+  UpgradeToMaster
 };
 
 class Process

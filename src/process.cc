@@ -97,6 +97,7 @@ void Process::elect_president()
       {
         tag = Tag::Endelection;
         president_id_ = get_id;
+        type_ = Type::President;
       }
       if (get_id > id) //No one was choosen
         id = get_id;   
@@ -114,9 +115,19 @@ void Process::elect_masters()
 {
   // TODO
   // Fill masters_ and workers_ with their ranks and send type to masters
-  for (int i = 0; i < world_size_; i++)
+  int n_masters = world_size_ * parameters_.ratio;
+
+  int workers_start = 0;
+  for (int i = 0; i < world_size_ && masters_.size() < n_masters; i++)
   {
-    if (i == president_id_)
+    if (i == rank_)
+      continue;
+    masters_.push_back(i);
+    workers_start = i;
+  }
+  for (int i = workers_start + 1; i < world_size_; i++)
+  {
+    if (i == rank_)
       continue;
     workers_.push_back(i);
   }
