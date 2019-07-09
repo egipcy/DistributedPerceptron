@@ -5,6 +5,8 @@
 #include "nn/nn.hh"
 #include "matrix/matrix.hh"
 
+#define _ELECTION_ANSWER_TIMEOUT_ 1 //seconds
+
 struct Parameters
 {
   int nb_hidden_layers = 2;
@@ -53,6 +55,7 @@ public:
   void end();
   void end_all() const;
 
+  void send_token(const int tag, int& electionEnded);
   void elect_president();
   void elect_masters();
   void init_nn();

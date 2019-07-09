@@ -3,8 +3,8 @@
 #include <mpi.h>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
-#include <time.h>
 #include <stdlib.h>
+#include "timeout.hh"
 
 Process::Process(int rank, int world_size, const std::string& filename_data,
   const std::string& filename_parameters)
@@ -12,6 +12,7 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   , world_size_(world_size)
   , left_id_(std::max(abs(rank_ - 1), world_size_ - 1))
   , right_id_((rank_ + 1) % world_size_)
+  , president_id_(rank)
   , type_(Type::Worker)
   , alive_(true)
   , has_ended_(false)
@@ -77,44 +78,76 @@ void Process::end_all() const
 }
 
 
-void send_to_neighbours(int tag, int rank, int id, int world_size)
+void Process::send_token(const int tag, int& electionEnded)
 {
+  MPI_Send(&president_id_, 1, MPI_INT, right_id_, tag, MPI_COMM_WORLD);
+  //Wait for answer
+  MPI_Request req;
+  MPI_Status status;
+  int msg = 0;
 
-  int destright = (rank + 1) % world_size;
-  MPI_Send(&id,1, MPI_INT,destright,tag,MPI_COMM_WORLD);
+  auto timer = generate_timer(_ELECTION_ANSWER_TIMEOUT_);
+  MPI_Irecv(&msg, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG,MPI_COMM_WORLD, &req);
+
+  int flag = 0;
+  while (!flag && timer())
+  {
+    MPI_Test(&req, &flag, &status);
+    if (flag)
+    {
+      if (status.MPI_TAG == Tag::Election)
+      {
+        if (status.MPI_SOURCE != left_id_)
+          left_id_ = status.MPI_SOURCE;
+        if (msg == rank_)
+        {
+          president_id_ = rank_;
+          electionEnded = true;
+          type_ == Type::President;
+        }
+        else
+        {
+          if (msg > president_id_)
+            president_id_ = msg;
+          flag = 0;
+          MPI_Irecv(&msg, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG,MPI_COMM_WORLD, &req);
+        }
+        MPI_Send(&msg, 1, MPI_INT, left_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD);
+      }
+      else if (status.MPI_TAG == Tag::Endelection)
+      {
+        electionEnded = true;
+        president_id_ = msg;
+      }
+    }
+  }
+  if (!flag) //right node is dead
+  {
+    right_id_ = (right_id_ + 1) % world_size_;
+    send_token(tag, electionEnded);
+  }
+  // received Tag::ElectionConfirmation
 }
 
 void Process::elect_president()
 {
   std::cout << "Begin President" << std::endl;
   int tag = Tag::Election;
-  int id = rank_;
-  while (tag == Tag::Election)
+  int electionEnded = false;
+  while (!electionEnded)
   {
-    send_to_neighbours(tag,rank_,id,world_size_);
-    MPI_Status status;
-    int get_id = rank_;
-    MPI_Recv(&get_id,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG ,MPI_COMM_WORLD,&status);
-    if (status.MPI_TAG == Tag::Endelection || status.MPI_TAG == Tag::Election)
+    send_token(tag, electionEnded);
+  }
+  if (type_ == Type::President)
+  {
+    for (auto& w: workers_)
     {
-      if (get_id == rank_) //I'm the president
-      { 
-        tag = Tag::Endelection;
-        president_id_ = get_id; 
-        send_to_neighbours(tag,rank_,rank_,world_size_);
-        break;
-      }
-      if (status.MPI_TAG == Tag::Endelection) //I'm worker
-      {
-        tag = Tag::Endelection;
-        president_id_ = get_id;
-        type_ = Type::President;
-      }
-      if (get_id > id) //No one was choosen
-        id = get_id;   
+      if (w == rank_)
+        continue;
+      MPI_Send(&president_id_,1, MPI_INT, w, Tag::Endelection, MPI_COMM_WORLD);
     }
-  } 
-}
+  }
+} 
 
 void Process::elect_masters()
 {
