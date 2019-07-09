@@ -89,7 +89,7 @@ void Process::elect_president()
   std::cout << "Begin President" << std::endl;
   int tag = Tag::Election;
   int id = rank_;
-  while(tag == Tag::Election)
+  while (tag == Tag::Election)
   {
     send_to_neighbours(tag,rank_,id,world_size_);
     MPI_Status status;
@@ -98,25 +98,25 @@ void Process::elect_president()
     int flag = false;
     MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
     
-    if(status.MPI_TAG == Tag::Endelection || status.MPI_TAG == Tag::Election)
-      {
-        MPI_Recv(&get_id,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG ,MPI_COMM_WORLD,&status);
-        if(get_id == rank_) //I'm the president
-            { 
-              tag = Tag::Endelection;
-              president_id_ = get_id; 
-              send_to_neighbours(tag,rank_,rank_,world_size_);
-              break;
-            }
-        if(status.MPI_TAG == Tag::Endelection) //I'm worker
-          {
-            tag = Tag::Endelection;
-            president_id_ = get_id;
-          }
-        if(get_id > id) //No one was choosen
-              id = get_id;   
+    if (status.MPI_TAG == Tag::Endelection || status.MPI_TAG == Tag::Election)
+    {
+      MPI_Recv(&get_id,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG ,MPI_COMM_WORLD,&status);
+      if (get_id == rank_) //I'm the president
+      { 
+        tag = Tag::Endelection;
+        president_id_ = get_id; 
+        send_to_neighbours(tag,rank_,rank_,world_size_);
+        break;
       }
-  } 
+      if (status.MPI_TAG == Tag::Endelection) //I'm worker
+      {
+        tag = Tag::Endelection;
+        president_id_ = get_id;
+      }
+      if (get_id > id) //No one was choosen
+        id = get_id;   
+    }
+  }
   // President election
   //president_id_ = 0;
   if (rank_ == president_id_)
