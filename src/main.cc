@@ -71,15 +71,16 @@ int main(int argc, char** argv)
       MPI_Get_count(&status, MPI_DOUBLE, &count_weight);
       std::vector<double> w(count_weight);
 
-      MPI_Recv(w.data(), count_weight, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+      MPI_Recv(w.data(), count_weight, MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD, &status);
 
       flag = false;
       while (!flag)
       {
-        MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+        MPI_Iprobe(status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &flag, &status);
       }
+      std::cout << "TAG=" << status.MPI_TAG << " should be=" << Tag::BiasesMatrix << std::endl;
       MPI_Get_count(&status, MPI_DOUBLE, &count_biais);
-      //std::cout <<"Recev Count_Biais =" <<  count_biais << std::endl;
+      std::cout <<"Recev Count_Biais = " <<  count_biais << std::endl;
       std::vector<double> b(count_biais);
 
       std::cout << p.get_rank() << " " << debug << " BEGIN#" << std::endl;
