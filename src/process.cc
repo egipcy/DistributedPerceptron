@@ -3,11 +3,15 @@
 #include <mpi.h>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
+#include <time.h>
+#include <stdlib.h>
 
 Process::Process(int rank, int world_size, const std::string& filename_data,
   const std::string& filename_parameters)
   : rank_(rank)
   , world_size_(world_size)
+  , left_id_(std::max(abs(rank_ - 1), world_size_ - 1))
+  , right_id_((rank_ + 1) % world_size_)
   , type_(Type::Worker)
   , alive_(true)
   , has_ended_(false)
@@ -75,13 +79,13 @@ void Process::end_all() const
 
 void send_to_neighbours(int tag, int rank, int id, int world_size)
 {
+
   int destright = (rank + 1) % world_size;
   MPI_Send(&id,1, MPI_INT,destright,tag,MPI_COMM_WORLD);
 }
 
 void Process::elect_president()
 {
-  /*
   std::cout << "Begin President" << std::endl;
   int tag = Tag::Election;
   int id = rank_;
@@ -110,12 +114,6 @@ void Process::elect_president()
         id = get_id;   
     }
   } 
-  */
-
-  // President election
-  president_id_ = 0;
-  if (rank_ == president_id_)
-    type_ = Type::President;
 }
 
 void Process::elect_masters()

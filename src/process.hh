@@ -27,6 +27,7 @@ enum Tag
   BiasesMatrix,
   Finished,
   Election,
+  ElectionConfirmation, //Means I received your Id
   Endelection,
   UpgradeToMaster
 };
@@ -66,6 +67,8 @@ public:
 private:
   int rank_;
   int world_size_;
+  int left_id_;
+  int right_id_;
   int president_id_;
   std::vector<int> masters_;
   std::vector<int> workers_;
