@@ -25,7 +25,9 @@ enum Tag
 {
   WeightsMatrix = 1,
   BiasesMatrix,
-  Finished
+  Finished,
+  Election,
+  Endelection
 };
 
 class Process

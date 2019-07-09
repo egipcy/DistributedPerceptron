@@ -65,13 +65,60 @@ void Process::end_all() const
     MPI_Send(&n, 1, MPI_INT, m, Tag::Finished, MPI_COMM_WORLD);
 }
 
+
+void send_to_neighbours(int tag, int rank, int id, int world_size)
+{
+  int destright = rank +1;
+  if(rank +1 > world_size-1)
+    destright = 0;
+  
+  if(destright != rank)
+    MPI_Send(&id,1, MPI_INT,destright,tag,MPI_COMM_WORLD);
+    
+  /* int destleft = rank -1;
+  if(rank -1 < 0)
+    destleft = world_size-1;
+  
+  if(destleft != rank && destleft != destright) // don't send to same guy 
+     MPI_Send(&id,1, MPI_INT,destleft,tag,MPI_COMM_WORLD);*/
+}
+/*MPI_Send(void* data,int count,MPI_Datatype datatype,int destination,int tag, MPI_Comm communicator) */
 void Process::elect_president()
 {
   // TODO
-
+  std::cout << "Begin President" << std::endl;
+  int tag = Tag::Election;
+  int id = rank_;
+  while(tag == Tag::Election)
+  {
+    send_to_neighbours(tag,rank_,id,world_size_);
+    MPI_Status status;
+  /*MPI_Recv(void* data,int count, MPI_Datatype datatype, int source, int tag,MPI_Comm communicator, MPI_Status* status) */
+    int get_id = rank_;
+    int flag = false;
+    MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&flag,&status);
+    
+    if(status.MPI_TAG == Tag::Endelection || status.MPI_TAG == Tag::Election)
+      {
+        MPI_Recv(&get_id,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG ,MPI_COMM_WORLD,&status);
+        if(get_id == rank_) //I'm the president
+            { 
+              tag = Tag::Endelection;
+              president_id_ = get_id; 
+              send_to_neighbours(tag,rank_,rank_,world_size_);
+              break;
+            }
+        if(status.MPI_TAG == Tag::Endelection) //I'm worker
+          {
+            tag = Tag::Endelection;
+            president_id_ = get_id;
+          }
+        if(get_id > id) //No one was choosen
+              id = get_id;   
+      }
+  } 
   // President election
-  president_id_ = 0;
-
+  //president_id_ = 0;
   if (rank_ == president_id_)
   {
     type_ = Type::President;
@@ -82,14 +129,12 @@ void Process::elect_president()
       workers_.push_back(i);
     }
   }
-
   // Init neural network
   std::vector<int> v;
   v.push_back(datas_.first.columns());
   for (int i = 0; i < parameters_.nb_hidden_layers; i++)
     v.push_back(parameters_.nb_hidden_neurons);
   v.push_back(datas_.second.columns());
-
   nn_ = NN(v);
 }
 
@@ -170,9 +215,13 @@ void Process::init_parameters(const std::string& filename_parameters)
 
 void Process::send_weights(int dest)
 {
+ 
   std::vector<double> weights = serialize(nn_.get_weights());
+  
   MPI_Send(weights.data(), weights.size(), MPI_DOUBLE, dest, Tag::WeightsMatrix, MPI_COMM_WORLD);
+ 
   std::vector<double> biases = serialize(nn_.get_biases());
+  
   MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, dest, Tag::BiasesMatrix, MPI_COMM_WORLD);
 }
 

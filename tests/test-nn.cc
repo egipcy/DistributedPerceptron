@@ -29,7 +29,7 @@ int main()
 {
   std::srand(std::time(nullptr));
 
-  NN nn({2, 2, 1});
+  NN nn({2, 3, 1});
   nn.print();
 
   Matrix inputs(4, 2);
