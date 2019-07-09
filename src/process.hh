@@ -27,7 +27,8 @@ enum Tag
   BiasesMatrix,
   Finished,
   Election,
-  Endelection
+  Endelection,
+  UpgradeToMaster
 };
 
 class Process
@@ -40,6 +41,7 @@ public:
 
   Type get_type() const;
   void set_type(Type type);
+  void upgrade_to_master(std::vector<int> masters);
 
   void save_nn(const std::string& filename) const;
 
