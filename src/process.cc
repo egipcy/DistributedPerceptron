@@ -34,7 +34,7 @@ void Process::set_type(Type type)
 
 void Process::save_nn(const std::string& filename) const
 {
-  return nn_.save(filename);
+  nn_.save(filename);
 }
 
 bool Process::is_alive() const
