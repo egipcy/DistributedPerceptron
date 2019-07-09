@@ -57,7 +57,19 @@ int main()
     nn.update_simple(p.first, p.second, 0.1);
   }
 
+  nn.save("test.nn");
+  NN nn2;
+  nn2.load("test.nn");
+
   std::cout << std::endl << "Results" << std::endl;
+  nn2.print();
+
+  p1 = nn2.forward(inputs);
+  for (int i = 0; i < 4; i++)
+    print_results(p1.first[i], labels[i]);
+  std::cout << std::endl;
+
+  std::cout << "MUST BE THE SAME" << std::endl;
   nn.print();
 
   p1 = nn.forward(inputs);

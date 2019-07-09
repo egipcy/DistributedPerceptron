@@ -2,6 +2,8 @@
 
 #include <cassert>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 NN::NN()
 { }
@@ -127,4 +129,59 @@ void NN::print() const
   std::cout << "Biases:" << std::endl;
   for (size_t i = 0; i < biases_.size(); i++)
     biases_[i].print();
+}
+
+void NN::save(const std::string& filename) const
+{
+  std::ofstream file(filename);
+  if(!file.is_open())
+  {
+    std::cerr << "File not found: " << filename << std::endl;
+    exit(1);
+  }
+
+  auto w = serialize(weights_);
+  auto b = serialize(biases_);
+
+  for (auto e: w)
+    file << e << " ";
+  file << "\n";
+
+  for (auto e: b)
+    file << e << " ";
+  file << "\n";
+
+  file.close();
+}
+
+void NN::load(const std::string& filename)
+{
+  std::ifstream file(filename);
+  if(!file.is_open())
+  {
+    std::cerr << "File not found: " << filename << std::endl;
+    exit(1);
+  }
+
+  std::vector<double> w;
+  std::vector<double> b;
+
+  std::string line;
+
+  std::getline(file, line);
+  std::stringstream ss(line);
+
+  for(double e = 0; ss >> e;)
+    w.push_back(e);
+
+  std::getline(file, line);
+  std::stringstream ss2(line);
+
+  for(double e = 0; ss2 >> e;)
+    b.push_back(e);
+
+  file.close();
+
+  weights_ = deserialize(w);
+  biases_ = deserialize(b);
 }

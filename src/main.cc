@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <cassert>
 #include "mpi.h"
 
 #include "process.hh"
@@ -8,10 +9,11 @@
 
 int main(int argc, char** argv)
 {
-  if (argc != 3)
+  int debug = 0;
+  if (argc != 4)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
-    std::cerr << "Arguments : data's path, config's path";
+    std::cerr << "Arguments : data's path, config's path, neural network's path" << std::endl;
     return 1;
   }
 
@@ -69,16 +71,23 @@ int main(int argc, char** argv)
       // but are gradients if p is a president
       MPI_Get_count(&status, MPI_DOUBLE, &count_weight);
       std::vector<double> w(count_weight);
-      MPI_Recv(w.data(), count_weight, MPI_DOUBLE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+
+      MPI_Recv(w.data(), count_weight, MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD, &status);
+
       flag = false;
       while (!flag)
       {
-        MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+        MPI_Iprobe(status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &flag, &status);
       }
+      std::cout << "TAG=" << status.MPI_TAG << " should be=" << Tag::BiasesMatrix << std::endl;
       MPI_Get_count(&status, MPI_DOUBLE, &count_biais);
-      //std::cout <<"Recev Count_Biais =" <<  count_biais << std::endl;
+      std::cout <<"Recev Count_Biais = " <<  count_biais << std::endl;
       std::vector<double> b(count_biais);
+
+      std::cout << p.get_rank() << " " << debug << " BEGIN#" << std::endl;
       MPI_Recv(b.data(), count_biais, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
+      std::cout << p.get_rank() << " " << debug++ << " END#" << std::endl;
+
       if (p.get_type() == Type::Worker)
       {
         std::cout << p.get_rank() << " Worker receive nn" << std::endl;
@@ -108,6 +117,7 @@ int main(int argc, char** argv)
         if (p.has_ended())
         {
           std::cout << p.get_rank() << " END everybody" << std::endl;
+          p.save_nn(argv[3]);
           p.end_all(); // send the tag Finished to everybody
         }
 
@@ -122,7 +132,7 @@ int main(int argc, char** argv)
     }
     else if (t == Tag::UpgradeToMaster)
     {
-      MPI_Get_count(&status, MPI_DOUBLE, &count);
+      MPI_Get_count(&status, MPI_INT, &count);
       std::vector<int> masters(count);
       MPI_Recv(masters.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
       p.upgrade_to_master(masters);

@@ -46,7 +46,7 @@ public:
   void set_type(Type type);
   void upgrade_to_master(std::vector<int> masters);
 
-  NN& get_nn();
+  void save_nn(const std::string& filename) const;
 
   bool is_alive() const;
   void set_alive(bool alive);
@@ -79,7 +79,7 @@ private:
   Type type_;
 
   NN nn_;
-  int i_epoch;
+  int i_epoch_;
 
   std::pair<Matrix, Matrix> datas_;
   void init_datas(const std::string& filename_data);

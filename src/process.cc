@@ -14,6 +14,7 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   , right_id_((rank_ + 1) % world_size_)
   , president_id_(rank)
   , type_(Type::Worker)
+  , i_epoch_(0)
   , alive_(true)
   , has_ended_(false)
 {
@@ -42,10 +43,9 @@ void Process::upgrade_to_master(std::vector<int> masters)
   masters_ = masters;
 }
 
-
-NN& Process::get_nn()
+void Process::save_nn(const std::string& filename) const
 {
-  return nn_;
+  nn_.save(filename);
 }
 
 bool Process::is_alive() const
@@ -204,9 +204,9 @@ void Process::elect_masters()
     workers_start = i;
   }
 
-  for (auto& m: masters_)
+  for (auto m: masters_)
   {
-    MPI_Send(masters_.data(),masters_.size(),MPI_INT,m,Tag::UpgradeToMaster, MPI_COMM_WORLD);
+    MPI_Send(masters_.data(), masters_.size(), MPI_INT, m, Tag::UpgradeToMaster, MPI_COMM_WORLD);
   }
   for (int i = workers_start + 1; i < world_size_; i++)
   {
@@ -310,7 +310,7 @@ void Process::send_weights(int dest)
 
 void Process::send_weights_all()
 {
-  for (auto& w: workers_)
+  for (auto w: workers_)
     send_weights(w);
 }
 
@@ -327,6 +327,6 @@ std::pair<std::vector<Matrix>, std::vector<Matrix>> Process::get_gradients()
 void Process::update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b)
 {
   nn_.update_simple(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate);
-  if (++i_epoch == parameters_.nb_epochs)
+  if (++i_epoch_ == parameters_.nb_epochs)
     has_ended_ = true;
 }
