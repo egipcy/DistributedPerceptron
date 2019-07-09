@@ -107,15 +107,23 @@ void Process::elect_president()
   // President election
   president_id_ = 0;
   if (rank_ == president_id_)
-  {
     type_ = Type::President;
-    for (int i = 0; i < world_size_; i++)
-    {
-      if (i == president_id_)
-        continue;
-      workers_.push_back(i);
-    }
+}
+
+void Process::elect_masters()
+{
+  // TODO
+  // Fill masters_ and workers_ with their ranks and send type to masters
+  for (int i = 0; i < world_size_; i++)
+  {
+    if (i == president_id_)
+      continue;
+    workers_.push_back(i);
   }
+}
+
+void Process::init_nn()
+{
   // Init neural network
   std::vector<int> v;
   v.push_back(datas_.first.columns());
@@ -123,12 +131,6 @@ void Process::elect_president()
     v.push_back(parameters_.nb_hidden_neurons);
   v.push_back(datas_.second.columns());
   nn_ = NN(v);
-}
-
-void Process::elect_masters()
-{
-  // TODO
-  // Fill masters_ and workers_ with their ranks
 }
 
 void Process::init_datas(const std::string& filename_data)

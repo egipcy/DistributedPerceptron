@@ -52,6 +52,7 @@ public:
 
   void elect_president();
   void elect_masters();
+  void init_nn();
 
   /* Communication */
   void send_weights(int dest);
