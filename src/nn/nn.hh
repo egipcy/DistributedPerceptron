@@ -3,6 +3,7 @@
 #include "../matrix/matrix.hh"
 
 #include <cmath>
+#include <string>
 
 class NN
 {
@@ -33,6 +34,9 @@ public:
     double lambda);
 
   void print() const;
+
+  void save(const std::string& filename) const;
+  void load(const std::string& filename);
 
 private:
   std::vector<Matrix> weights_;

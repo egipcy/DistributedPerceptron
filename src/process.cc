@@ -9,6 +9,7 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   : rank_(rank)
   , world_size_(world_size)
   , type_(Type::Worker)
+  , i_epoch_(0)
   , alive_(true)
   , has_ended_(false)
 {
@@ -31,9 +32,9 @@ void Process::set_type(Type type)
   type_ = type;
 }
 
-NN& Process::get_nn()
+void Process::save_nn(const std::string& filename) const
 {
-  return nn_;
+  return nn_.save(filename);
 }
 
 bool Process::is_alive() const
@@ -233,6 +234,6 @@ std::pair<std::vector<Matrix>, std::vector<Matrix>> Process::get_gradients()
 void Process::update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b)
 {
   nn_.update_simple(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate);
-  if (++i_epoch == parameters_.nb_epochs)
+  if (++i_epoch_ == parameters_.nb_epochs)
     has_ended_ = true;
 }

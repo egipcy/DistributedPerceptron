@@ -41,7 +41,7 @@ public:
   Type get_type() const;
   void set_type(Type type);
 
-  NN& get_nn();
+  void save_nn(const std::string& filename) const;
 
   bool is_alive() const;
   void set_alive(bool alive);
@@ -71,7 +71,7 @@ private:
   Type type_;
 
   NN nn_;
-  int i_epoch;
+  int i_epoch_;
 
   std::pair<Matrix, Matrix> datas_;
   void init_datas(const std::string& filename_data);

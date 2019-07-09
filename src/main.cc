@@ -8,10 +8,10 @@
 
 int main(int argc, char** argv)
 {
-  if (argc != 3)
+  if (argc != 4)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
-    std::cerr << "Arguments : data's path, config's path";
+    std::cerr << "Arguments : data's path, config's path, neural network's path" << std::endl;
     return 1;
   }
 
@@ -108,6 +108,7 @@ int main(int argc, char** argv)
         if (p.has_ended())
         {
           std::cout << p.get_rank() << " END everybody" << std::endl;
+          p.save_nn(argv[3]);
           p.end_all(); // send the tag Finished to everybody
         }
 

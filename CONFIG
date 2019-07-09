@@ -1,4 +1,4 @@
 nb_hidden_layers = 1
 nb_hidden_neurons = 3
 learning_rate = 0.01
-nb_epochs = 3
+nb_epochs = 100000
