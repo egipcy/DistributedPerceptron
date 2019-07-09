@@ -74,13 +74,13 @@ void send_to_neighbours(int tag, int rank, int id, int world_size)
   
   if(destright != rank)
     MPI_Send(&id,1, MPI_INT,destright,tag,MPI_COMM_WORLD);
-  
-  int destleft = rank -1;
+    
+  /* int destleft = rank -1;
   if(rank -1 < 0)
     destleft = world_size-1;
   
   if(destleft != rank && destleft != destright) // don't send to same guy 
-     MPI_Send(&id,1, MPI_INT,destleft,tag,MPI_COMM_WORLD);
+     MPI_Send(&id,1, MPI_INT,destleft,tag,MPI_COMM_WORLD);*/
 }
 /*MPI_Send(void* data,int count,MPI_Datatype datatype,int destination,int tag, MPI_Comm communicator) */
 void Process::elect_president()
@@ -135,7 +135,6 @@ void Process::elect_president()
   for (int i = 0; i < parameters_.nb_hidden_layers; i++)
     v.push_back(parameters_.nb_hidden_neurons);
   v.push_back(datas_.second.columns());
-
   nn_ = NN(v);
 }
 
