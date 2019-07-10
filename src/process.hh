@@ -14,6 +14,8 @@ struct Parameters
   int nb_epochs = 1000;
   double ratio = 0.3;
   int time_save = 100;
+  int formula = 2;
+  double lambda = 0.04;
 };
 
 enum class Type
@@ -31,7 +33,8 @@ enum Tag
   Election,
   ElectionConfirmation, //Means I received your Id
   Endelection,
-  UpgradeToMaster
+  UpgradeToMaster,
+  StoreWorkers
 };
 
 class Process
@@ -51,7 +54,8 @@ public:
   // void set_i_epoch(int currently_epochs);
   void set_need_load();
   void set_type(Type type);
-  void upgrade_to_master(std::vector<int> masters);
+  void upgrade_to_master(const std::vector<int>& masters);
+  void save_workers(const std::vector<int>& workers);
   void master_to_president();
 
   void save_nn(const std::string& filename, int n_epoch);
@@ -67,6 +71,8 @@ public:
   void elect_president();
   void elect_masters();
   void init_nn();
+
+  const Parameters& get_parameters() const;
 
 
   /* Communication */

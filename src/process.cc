@@ -74,7 +74,7 @@ void Process::set_i_epoch(int currently_epochs)
   i_epoch_ = currently_epochs;
  }*/
 
-void Process::upgrade_to_master(std::vector<int> masters)
+void Process::upgrade_to_master(const std::vector<int>& masters)
 {
   type_ = Type::Master;
   masters_ = masters;
@@ -132,6 +132,12 @@ void Process::upgrade_to_master(std::vector<int> masters)
     }
   }
   // std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
+}
+
+void Process::save_workers(const std::vector<int>& workers)
+{
+  workers_ = workers;
+
 }
 
 void Process::master_to_president()
@@ -300,16 +306,17 @@ void Process::elect_masters()
     masters_.push_back(i);
     workers_start = i;
   }
-
-  for (auto m: masters_)
-  {
-    MPI_Send(masters_.data(), masters_.size(), MPI_INT, m, Tag::UpgradeToMaster, MPI_COMM_WORLD);
-  }
   for (int i = workers_start + 1; i < world_size_; i++)
   {
     if (i == rank_)
       continue;
     workers_.push_back(i);
+  }
+
+  for (auto m: masters_)
+  {
+    MPI_Send(masters_.data(), masters_.size(), MPI_INT, m, Tag::UpgradeToMaster, MPI_COMM_WORLD);
+    MPI_Send(workers_.data(), workers_.size(), MPI_INT, m, Tag::StoreWorkers, MPI_COMM_WORLD);
   }
 }
 
@@ -322,6 +329,11 @@ void Process::init_nn()
     v.push_back(parameters_.nb_hidden_neurons);
   v.push_back(datas_.second.columns());
   nn_ = NN(v);
+}
+
+const Parameters& Process::get_parameters() const
+{
+  return parameters_;
 }
 
 void Process::init_datas(const std::string& filename_data)
@@ -390,6 +402,10 @@ void Process::init_parameters(const std::string& filename_parameters)
       parameters_.ratio = std::stod(value);
     else if (param == "time_save")
       parameters_.time_save = std::stod(value);
+    else if (param == "formula")
+      parameters_.formula = std::stoi(value);
+    else if (param == "lambda")
+      parameters_.lambda = std::stod(value);
     else
       std::cerr << "Unknown parameter: " << param << std::endl;
   }
@@ -410,8 +426,12 @@ void Process::send_weights(int dest)
 
 void Process::send_weights_all()
 {
+  std::cout << "President " << rank_ << " sends weights to " << workers_.size() << " workers" << std::endl;
   for (auto w: workers_)
+  {
+    std::cout << "Sending weight to " << w << std::endl;
     send_weights(w);
+  }
 }
 
 void Process::send_weights_to_master()
