@@ -3,7 +3,7 @@ project(DistributedPerceptron)
 project(test-matrix)
 project(test-message)
 project(test-nn)
-project(test-run)
+project(run)
 
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
@@ -40,13 +40,13 @@ set (NN
 # Main binary
 
 add_executable(DistributedPerceptron ${FINALY} ${SRC})
-add_executable(test-run ${RUN} ${SRC})
+add_executable(run ${RUN} ${SRC})
 add_executable(test-message ${MESSAGE} ${SRC})
 add_executable(test-matrix ${MATRIX} ${SRC})
 add_executable(test-nn ${NN} ${SRC})
 
 target_link_libraries(DistributedPerceptron ${MPI_LIBRARIES})
-target_link_libraries(test-run ${MPI_LIBRARIES})
+target_link_libraries(run ${MPI_LIBRARIES})
 target_link_libraries(test-message ${MPI_LIBRARIES})
 target_link_libraries(test-matrix ${MPI_LIBRARIES})
 target_link_libraries(test-nn ${MPI_LIBRARIES})
