@@ -25,24 +25,17 @@ int main(int argc, char** argv)
   int rank, world_size;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  
+
   Process p = Process(rank, world_size, argv[1], argv[2]);
   if(argc == 5)
     p.set_need_load();
-  //std::cout << p.get_rank() << " Election..." << std::endl;
   p.elect_president();
-  //std::cout << p.get_rank() << " END Election" << std::endl;
   if (p.get_type() == Type::President)
   {
-    std::cout << p.get_rank() << " is President" << std::endl;
     p.elect_masters();
     p.init_nn();
     if(p.get_need_load())
-    {
-      std::cout << "load file" << std::endl;
       p.load_nn(argv[4]);
-    }
-    std::cout << p.get_epoch() << std::endl;
     p.send_weights_all();
   }
 
@@ -116,7 +109,6 @@ int main(int argc, char** argv)
           p.set_president(status.MPI_SOURCE);
         }
       }
-      //std::cout << p.get_rank() << " Matrix received" << std::endl;
       int count_weight = 0;
       int count_biais = 0;
       // w and b are weights and biases if p is a worker or master
@@ -144,9 +136,7 @@ int main(int argc, char** argv)
 
         auto g_weights = serialize(g.first);
         auto g_biases = serialize(g.second);
-        //std::cout << "send: " << g_weights.size() << std::endl;
         MPI_Send(g_weights.data(), g_weights.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::WeightsMatrix, MPI_COMM_WORLD);
-        //std::cout << "send: " << g_biases.size() << std::endl;
         MPI_Send(g_biases.data(), g_biases.size(), MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD);
       }
       else if (p.get_type() == Type::Master)
@@ -155,24 +145,19 @@ int main(int argc, char** argv)
         p.set_weights_biases(w, b);
         //std::cout << "Master write the saving file" <<  std::endl;
         std::stringstream filename;
-        std::cout << "SAVE #" << p.get_time_to_save() * nb_pass << std::endl;
+        std::cout << "Master n°" << p.get_rank() << " SAVE #" << nb_pass << std::endl;
         filename << "Save_master_" << p.get_rank();
         p.save_nn(filename.str(),p.get_time_to_save() * nb_pass);
       }
       else // if (p.get_type() == Type::President)
       {
-        //std::cout << p.get_rank() << " President receive gradients" << std::endl;
         p.update_nn(w, b);
-        // p.update_nn_delayed1(w, b, status.MPI_SOURCE, 2.0);
-        // p.update_nn_delayed2(w, b, status.MPI_SOURCE, 0.04);
 
         if (p.has_ended())
         {
           p.save_nn(argv[3], p.get_epoch());
           p.end_all(); // send the tag Finished to everybody
         }
-
-        // std::cout << p.get_rank() << " President send nn" << std::endl;
 
         p.send_weights(status.MPI_SOURCE);
 

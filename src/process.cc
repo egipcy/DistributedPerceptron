@@ -131,7 +131,7 @@ void Process::upgrade_to_master(std::vector<int> masters)
       }
     }
   }
-  std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
+  // std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
 }
 
 void Process::master_to_president()
@@ -159,7 +159,6 @@ void Process::save_nn(const std::string& filename, int n_epoch) const
 void Process::load_nn(const std::string& filename)
 {
   i_epoch_ = nn_.load(filename);
-  std::cout << i_epoch_ << std::endl;
 }
 
 bool Process::is_alive() const
