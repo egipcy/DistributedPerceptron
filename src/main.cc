@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 
   //std::cout << p.get_rank() << " Election..." << std::endl;
   p.elect_president();
-  //std::cout << p.get_rank() << " ND Election" << std::endl;
+  //std::cout << p.get_rank() << " END Election" << std::endl;
   if (p.get_type() == Type::President)
   {
     std::cout << p.get_rank() << " is President" << std::endl;
@@ -37,6 +37,8 @@ int main(int argc, char** argv)
 
   MPI_Status status;
   int count;
+  int nb_pass = 0;
+  int nb_save = 0;
   while (!p.has_ended())
   {
     int flag = false;
@@ -57,13 +59,12 @@ int main(int argc, char** argv)
     }
 
 
-    std::cout << p.get_rank() << " Received something tag=" << status.MPI_TAG 
-    << " from " << status.MPI_SOURCE << std::endl;
+    // std::cout << p.get_rank() << " Received something tag=" << status.MPI_TAG  << " from " << status.MPI_SOURCE << std::endl;
 
     int t = status.MPI_TAG;
     if (t == Tag::WeightsMatrix)
     {
-      std::cout << p.get_rank() << " Matrix received" << std::endl;
+      //std::cout << p.get_rank() << " Matrix received" << std::endl;
 
       int count_weight = 0;
       int count_biais = 0;
@@ -76,27 +77,25 @@ int main(int argc, char** argv)
 
       flag = false;
       while (!flag)
-      {
         MPI_Iprobe(status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &flag, &status);
-      }
-      std::cout << "TAG=" << status.MPI_TAG << " should be=" << Tag::BiasesMatrix << std::endl;
+      //      std::cout << "TAG=" << status.MPI_TAG << " should be=" << Tag::BiasesMatrix << std::endl;
       MPI_Get_count(&status, MPI_DOUBLE, &count_biais);
-      std::cout <<"Recev Count_Biais = " <<  count_biais << std::endl;
+      // std::cout <<"Recev Count_Biais = " <<  count_biais << std::endl;
       std::vector<double> b(count_biais);
 
-      std::cout << p.get_rank() << " " << debug << " BEGIN#" << std::endl;
+      // std::cout << p.get_rank() << " " << debug << " BEGIN#" << std::endl;
       MPI_Recv(b.data(), count_biais, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
-      std::cout << p.get_rank() << " " << debug++ << " END#" << std::endl;
+      // std::cout << p.get_rank() << " " << debug++ << " END#" << std::endl;
 
       if (p.get_type() == Type::Worker)
       {
-        std::cout << p.get_rank() << " Worker receive nn" << std::endl;
+        //std::cout << p.get_rank() << " Worker receive nn" << std::endl;
         p.set_weights_biases(w, b);
 
-        std::cout << p.get_rank() << " Worker calculate gradients" << std::endl;
+        // std::cout << p.get_rank() << " Worker calculate gradients" << std::endl;
         std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradients(); // weights, biases
 
-        std::cout << p.get_rank() << " Worker send gradients" << std::endl;
+        //std::cout << p.get_rank() << " Worker send gradients" << std::endl;
         auto g_weights = serialize(g.first);
         auto g_biases = serialize(g.second);
         //std::cout << "send: " << g_weights.size() << std::endl;
@@ -111,7 +110,8 @@ int main(int argc, char** argv)
       }
       else // if (p.get_type() == Type::President)
       {
-        std::cout << p.get_rank() << " President receive gradients" << std::endl;
+        //std::cout << p.get_rank() << " President receive gradients" << std::endl;
+        nb_pass++;
         p.update_nn(w, b);
 
         if (p.has_ended())
@@ -121,8 +121,15 @@ int main(int argc, char** argv)
           p.end_all(); // send the tag Finished to everybody
         }
 
-        std::cout << p.get_rank() << " President send nn" << std::endl;
+        // std::cout << p.get_rank() << " President send nn" << std::endl;
         p.send_weights(status.MPI_SOURCE);
+
+        if(nb_pass % p.get_time_to_save() == 0)
+        {
+          nb_save++;
+          std::cout << "The president send nn to master for the " << nb_save << std::endl;
+          p.send_weights_to_master();
+        }
       }
     }
     else if (t == Tag::Finished)

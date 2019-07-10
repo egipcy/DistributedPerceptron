@@ -31,12 +31,15 @@ Type Process::get_type() const
 {
   return type_;
 }
+int Process::get_time_to_save() const
+{
+  return parameters_.time_save;
+}
 
 void Process::set_type(Type type)
 {
   type_ = type;
 }
-
 void Process::upgrade_to_master(std::vector<int> masters)
 {
   type_ = Type::Master;
@@ -205,7 +208,6 @@ void Process::elect_president()
       has_ended = true;
       break;
     }
-    
     if (flag && rec > president_id_)
       president_id_ = rec;
     else if (flag && rec == rank_)
@@ -251,8 +253,6 @@ void Process::elect_president()
     MPI_Recv(&rec, 1, MPI_INT, right_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD, &status);
     MPI_Send(&president_id_, 1, MPI_INT, right_id_, Tag::Endelection, MPI_COMM_WORLD);
   }
-  std::cout << rank_ << std::endl;
-  
 }
 
 void Process::elect_masters()
@@ -357,6 +357,8 @@ void Process::init_parameters(const std::string& filename_parameters)
       parameters_.nb_epochs = std::stoi(value);
     else if (param == "ratio")
       parameters_.ratio = std::stod(value);
+    else if (param == "time_save")
+      parameters_.time_save = std::stod(value);
     else
       std::cerr << "Unknown parameter: " << param << std::endl;
   }
@@ -377,6 +379,12 @@ void Process::send_weights(int dest)
 void Process::send_weights_all()
 {
   for (auto w: workers_)
+    send_weights(w);
+}
+
+void Process::send_weights_to_master()
+{
+  for (auto w: masters_)
     send_weights(w);
 }
 
