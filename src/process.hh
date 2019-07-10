@@ -5,7 +5,6 @@
 #include "nn/nn.hh"
 #include "matrix/matrix.hh"
 
-#define _ELECTION_ANSWER_TIMEOUT_ 5 //seconds
 
 struct Parameters
 {

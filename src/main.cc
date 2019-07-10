@@ -3,12 +3,16 @@
 #include <cassert>
 #include "mpi.h"
 
+#include "timeout.hh"
 #include "process.hh"
 #include "matrix/matrix.hh"
-
+#include "timeout.hh"
 
 int main(int argc, char** argv)
 {
+  std::vector<double> kill_times = {1.0, 2.5};
+  std::vector<double> kill_ids = {7, 8};
+
   int debug = 0;
   if (argc != 4)
   {
@@ -35,28 +39,49 @@ int main(int argc, char** argv)
     p.send_weights_all();
   }
 
+  std::vector<std::function<bool()>> kill_timeouts(kill_times.size());
+  for (size_t i = 0; i < kill_timeouts.size(); i++)
+    kill_timeouts[i] = generate_timer(kill_times[i]);
+
   MPI_Status status;
   int count;
   int nb_pass = 0;
   int nb_save = 0;
   while (!p.has_ended())
   {
+    for (size_t i = 0; i < kill_timeouts.size(); i++)
+      if (!kill_timeouts[i])
+      {
+        if (kill_ids[i] == p.get_rank())
+        {
+          std::cout << p.get_rank() << " gets killed" << std::endl;
+          MPI_Finalize();
+          return 0;
+        }
+        kill_timeouts.erase(kill_timeouts.begin() + i);
+        kill_times.erase(kill_times.begin() + i);
+        kill_ids.erase(kill_ids.begin() + i);
+        i--;
+      }
+
     int flag = false;
-    while (!flag)
+    Type ptype = p.get_type();
+    if (ptype == Type::President || ptype == Type::Worker)
     {
-      if (p.get_type() == Type::President)
-      {
-        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-      }
-      else if (p.get_type() == Type::Worker)
-      {
-        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-      }
-      else // p.get_type() == Type::Master
+      while (!flag)
       {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
     }
+    else // p.get_type() == Type::Master
+    {
+      auto timer = generate_timer(_MASTER_WAIT_TIMEOUT_);
+      while (!flag && timer())
+      {
+        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+      }
+    }
+<<<<<<< HEAD
 
 
     // std::cout << p.get_rank() << " Received something tag=" << status.MPI_TAG  << " from " << status.MPI_SOURCE << std::endl;
@@ -66,6 +91,12 @@ int main(int argc, char** argv)
     {
       //std::cout << p.get_rank() << " Matrix received" << std::endl;
 
+=======
+    
+    int t = status.MPI_TAG;
+    if (t == Tag::WeightsMatrix)
+    {
+>>>>>>> 9e9a330f673369914043eb5baffe42501bec68a3
       int count_weight = 0;
       int count_biais = 0;
       // w and b are weights and biases if p is a worker or master
@@ -78,24 +109,19 @@ int main(int argc, char** argv)
       flag = false;
       while (!flag)
         MPI_Iprobe(status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &flag, &status);
-      //      std::cout << "TAG=" << status.MPI_TAG << " should be=" << Tag::BiasesMatrix << std::endl;
+
       MPI_Get_count(&status, MPI_DOUBLE, &count_biais);
-      // std::cout <<"Recev Count_Biais = " <<  count_biais << std::endl;
+
       std::vector<double> b(count_biais);
 
-      // std::cout << p.get_rank() << " " << debug << " BEGIN#" << std::endl;
       MPI_Recv(b.data(), count_biais, MPI_DOUBLE, status.MPI_SOURCE, Tag::BiasesMatrix, MPI_COMM_WORLD, &status);
-      // std::cout << p.get_rank() << " " << debug++ << " END#" << std::endl;
 
       if (p.get_type() == Type::Worker)
       {
-        //std::cout << p.get_rank() << " Worker receive nn" << std::endl;
         p.set_weights_biases(w, b);
 
-        // std::cout << p.get_rank() << " Worker calculate gradients" << std::endl;
         std::pair<std::vector<Matrix>, std::vector<Matrix>> g = p.get_gradients(); // weights, biases
 
-        //std::cout << p.get_rank() << " Worker send gradients" << std::endl;
         auto g_weights = serialize(g.first);
         auto g_biases = serialize(g.second);
         //std::cout << "send: " << g_weights.size() << std::endl;
@@ -105,7 +131,6 @@ int main(int argc, char** argv)
       }
       else if (p.get_type() == Type::Master)
       {
-        std::cout << p.get_rank() << " Master update nn" << std::endl;
         p.set_weights_biases(w, b);
       }
       else // if (p.get_type() == Type::President)
@@ -116,12 +141,12 @@ int main(int argc, char** argv)
 
         if (p.has_ended())
         {
-          std::cout << p.get_rank() << " END everybody" << std::endl;
           p.save_nn(argv[3]);
           p.end_all(); // send the tag Finished to everybody
         }
 
         // std::cout << p.get_rank() << " President send nn" << std::endl;
+
         p.send_weights(status.MPI_SOURCE);
 
         if(nb_pass % p.get_time_to_save() == 0)
@@ -134,7 +159,6 @@ int main(int argc, char** argv)
     }
     else if (t == Tag::Finished)
     {
-      std::cout << p.get_rank() << " END received" << std::endl;
       p.end();
     }
     else if (t == Tag::UpgradeToMaster)
