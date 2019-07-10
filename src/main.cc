@@ -81,8 +81,6 @@ int main(int argc, char** argv)
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
     }
-<<<<<<< HEAD
-
 
     // std::cout << p.get_rank() << " Received something tag=" << status.MPI_TAG  << " from " << status.MPI_SOURCE << std::endl;
 
@@ -90,13 +88,6 @@ int main(int argc, char** argv)
     if (t == Tag::WeightsMatrix)
     {
       //std::cout << p.get_rank() << " Matrix received" << std::endl;
-
-=======
-    
-    int t = status.MPI_TAG;
-    if (t == Tag::WeightsMatrix)
-    {
->>>>>>> 9e9a330f673369914043eb5baffe42501bec68a3
       int count_weight = 0;
       int count_biais = 0;
       // w and b are weights and biases if p is a worker or master
