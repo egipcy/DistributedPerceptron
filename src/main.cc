@@ -194,6 +194,14 @@ int main(int argc, char** argv)
       MPI_Recv(masters.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
       p.upgrade_to_master(masters);
     }
+    else if (t == Tag::StoreWorkers)
+    {
+      MPI_Get_count(&status, MPI_INT, &count);
+      //std::cout << "store workers " << count << std::endl;
+      std::vector<int> workers(count);
+      MPI_Recv(workers.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+      p.save_workers(workers);
+    }
   }
 
   std::cout << p.get_rank() << " FINISH" << std::endl;

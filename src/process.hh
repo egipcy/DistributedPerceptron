@@ -31,7 +31,8 @@ enum Tag
   Election,
   ElectionConfirmation, //Means I received your Id
   Endelection,
-  UpgradeToMaster
+  UpgradeToMaster,
+  StoreWorkers
 };
 
 class Process
@@ -51,7 +52,8 @@ public:
   // void set_i_epoch(int currently_epochs);
   void set_need_load();
   void set_type(Type type);
-  void upgrade_to_master(std::vector<int> masters);
+  void upgrade_to_master(const std::vector<int>& masters);
+  void save_workers(const std::vector<int>& workers);
   void master_to_president();
 
   void save_nn(const std::string& filename, int n_epoch) const;

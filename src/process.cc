@@ -74,7 +74,7 @@ void Process::set_i_epoch(int currently_epochs)
   i_epoch_ = currently_epochs;
  }*/
 
-void Process::upgrade_to_master(std::vector<int> masters)
+void Process::upgrade_to_master(const std::vector<int>& masters)
 {
   type_ = Type::Master;
   masters_ = masters;
@@ -132,6 +132,12 @@ void Process::upgrade_to_master(std::vector<int> masters)
     }
   }
   std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
+}
+
+void Process::save_workers(const std::vector<int>& workers)
+{
+  workers_ = workers;
+
 }
 
 void Process::master_to_president()
@@ -300,16 +306,17 @@ void Process::elect_masters()
     masters_.push_back(i);
     workers_start = i;
   }
-
-  for (auto m: masters_)
-  {
-    MPI_Send(masters_.data(), masters_.size(), MPI_INT, m, Tag::UpgradeToMaster, MPI_COMM_WORLD);
-  }
   for (int i = workers_start + 1; i < world_size_; i++)
   {
     if (i == rank_)
       continue;
     workers_.push_back(i);
+  }
+
+  for (auto m: masters_)
+  {
+    MPI_Send(masters_.data(), masters_.size(), MPI_INT, m, Tag::UpgradeToMaster, MPI_COMM_WORLD);
+    MPI_Send(workers_.data(), workers_.size(), MPI_INT, m, Tag::StoreWorkers, MPI_COMM_WORLD);
   }
 }
 
@@ -410,8 +417,12 @@ void Process::send_weights(int dest)
 
 void Process::send_weights_all()
 {
+  std::cout << "President " << rank_ << " sends weights to " << workers_.size() << " workers" << std::endl;
   for (auto w: workers_)
+  {
+    std::cout << "Sending weight to " << w << std::endl;
     send_weights(w);
+  }
 }
 
 void Process::send_weights_to_master()
