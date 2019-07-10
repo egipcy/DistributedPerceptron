@@ -5,6 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <stdlib.h>
 #include "timeout.hh"
+#include <algorithm>
 
 Process::Process(int rank, int world_size, const std::string& filename_data,
   const std::string& filename_parameters)
@@ -41,6 +42,61 @@ void Process::upgrade_to_master(std::vector<int> masters)
 {
   type_ = Type::Master;
   masters_ = masters;
+  if (masters_.size() == 1)
+  {
+    left_id_ = rank_;
+    right_id_ = rank_;
+  }
+  else
+  {
+    bool has_left = false;
+    bool has_right = false;
+    for (int i = rank_ - 1; i >= 0; i--)
+    {
+      if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+      {
+        left_id_ = i;
+        has_left = true;
+        break;
+      }
+    }
+    if (has_left == false)
+    {
+      for (int i = world_size_ - 1; i > rank_; i--)
+      {
+        if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+        {
+          left_id_ = i;
+          has_left = true;
+          break;
+        }
+      }
+    }
+
+    for (int i = rank_ + 1; i < world_size_; i++)
+    {
+      if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+      {
+        right_id_ = i;
+        has_right = true;
+        break;
+      }
+    }
+    if (has_right == false)
+    {
+      for (int i = 0; i < rank_; i++)
+      {
+        if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+        {
+          right_id_ = i;
+          has_right = true;
+          break;
+        }
+      }
+    }
+  }
+
+  std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
 }
 
 void Process::save_nn(const std::string& filename) const
@@ -94,7 +150,7 @@ void Process::end_all() const
  */
 void Process::elect_president()
 {
-  //std::cout << rank_ << " Begin President" << std::endl;
+  std::cout << rank_ << " Begin President" << std::endl;
   bool has_ended = false;
   bool should_end = false;
   int i = 0;
@@ -125,6 +181,7 @@ void Process::elect_president()
       has_ended = true;
       break;
     }
+    
     
     if (flag && rec > president_id_)
       president_id_ = rec;

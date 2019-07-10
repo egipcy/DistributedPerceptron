@@ -74,12 +74,26 @@ int main(int argc, char** argv)
     else // p.get_type() == Type::Master
     {
       auto timer = generate_timer(_MASTER_WAIT_TIMEOUT_);
-      while (!flag && timer())
+      while (!flag)
       {
+        if (!timer())
+        {
+          std::cout << "president is dead" << std::endl;
+          timer = [](){return true;};
+          p.elect_president();
+          if (ptype == Type::President)
+          {
+            std::cout << "master " << p.get_rank() << " is the new president. "
+            << "Tag: " << status.MPI_TAG << std::endl;
+            p.send_weights_all();
+            status.MPI_TAG = -1;
+            std::cout << "Tag after modification " << status.MPI_TAG << std::endl;
+            break;
+          }
+        }
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
     }
-    
     int t = status.MPI_TAG;
     if (t == Tag::WeightsMatrix)
     {
@@ -145,6 +159,11 @@ int main(int argc, char** argv)
       MPI_Recv(masters.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
       p.upgrade_to_master(masters);
     }
+    else if (t == Tag::Election && ptype == Type::Master)
+    {
+      p.elect_president();
+    }
+    
   }
 
   std::cout << p.get_rank() << " FINISH" << std::endl;
