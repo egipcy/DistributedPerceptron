@@ -24,10 +24,11 @@ int main(int argc, char** argv)
 
   Process p = Process(rank, world_size, argv[1], argv[2]);
 
-  std::cout << p.get_rank() << " Election..." << std::endl;
+  //std::cout << p.get_rank() << " Election..." << std::endl;
   p.elect_president();
-  std::cout << p.get_rank() << " END Election" << std::endl;
-
+  //std::cout << p.get_rank() << " ND Election" << std::endl;
+  MPI_Finalize();
+  return 0;
   if (p.get_type() == Type::President)
   {
     std::cout << p.get_rank() << " is President" << std::endl;
@@ -58,7 +59,8 @@ int main(int argc, char** argv)
     }
 
 
-    std::cout << p.get_rank() << " Received something tag=" << status.MPI_TAG << std::endl;
+    std::cout << p.get_rank() << " Received something tag=" << status.MPI_TAG 
+    << " from " << status.MPI_SOURCE << std::endl;
 
     int t = status.MPI_TAG;
     if (t == Tag::WeightsMatrix)

@@ -10,7 +10,6 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   const std::string& filename_parameters)
   : rank_(rank)
   , world_size_(world_size)
-  , left_id_(std::max(abs(rank_ - 1), world_size_ - 1))
   , right_id_((rank_ + 1) % world_size_)
   , president_id_(rank)
   , type_(Type::Worker)
@@ -18,6 +17,7 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   , alive_(true)
   , has_ended_(false)
 {
+  left_id_ = rank - 1 < 0 ? world_size_ - 1 : rank - 1;
   init_datas(filename_data);
   init_parameters(filename_parameters);
 }
@@ -78,23 +78,31 @@ void Process::end_all() const
 }
 
 
-void Process::send_token(const int tag, int& electionEnded)
+void Process::send_token(const int tag, int& electionEnded, int& last_sent_rank)
 {
-  MPI_Send(&president_id_, 1, MPI_INT, right_id_, tag, MPI_COMM_WORLD);
-  //Wait for answer
+   //Wait for answer
   MPI_Request req;
-  MPI_Status status;
   int msg = 0;
-
-  auto timer = generate_timer(_ELECTION_ANSWER_TIMEOUT_);
   MPI_Irecv(&msg, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG,MPI_COMM_WORLD, &req);
+  MPI_Status status;
+  if (last_sent_rank != president_id_)
+  {
+    MPI_Request req_send;
+    std::cout << rank_ << " " << president_id_ << " " << last_sent_rank << std::endl;
+    last_sent_rank = president_id_;
+    MPI_Isend(&president_id_, 1, MPI_INT, right_id_, tag, MPI_COMM_WORLD, &req_send);
+    MPI_Wait(&req_send, &status);
+    std::cout << rank_ << " sends " << president_id_ << " to " << right_id_ << std::endl;
+  }
 
+  //auto timer = generate_timer(_ELECTION_ANSWER_TIMEOUT_);
   int flag = 0;
-  while (!flag && timer())
+  while (!flag)
   {
     MPI_Test(&req, &flag, &status);
     if (flag)
     {
+      std::cout << rank_ << " flag" << std::endl;
       if (status.MPI_TAG == Tag::Election)
       {
         if (status.MPI_SOURCE != left_id_)
@@ -105,30 +113,49 @@ void Process::send_token(const int tag, int& electionEnded)
           electionEnded = true;
           type_ == Type::President;
           MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::Endelection, MPI_COMM_WORLD);
+          std::cout << rank_ << " receives it's own id from " << left_id_
+          << " and send it back EndElection" << std::endl;
         }
         else
         {
           if (msg > president_id_)
+          {
+            std::cout << rank_ << "'s president was " << president_id_
+            << " but received " << msg << " from " << status.MPI_SOURCE << std::endl;
             president_id_ = msg;
+          }
           flag = 0;
-          MPI_Irecv(&msg, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG,MPI_COMM_WORLD, &req);
-          MPI_Test(&req, &flag, &status);
+          std::cout << rank_ << " sends a confirmation to " << left_id_ << std::endl;
           MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD);
+          MPI_Irecv(&msg, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG,MPI_COMM_WORLD, &req);
         }
       }
       else if (status.MPI_TAG == Tag::Endelection)
       {
         electionEnded = true;
         president_id_ = msg;
+        std::cout << rank_ << " received EndElection from " << status.MPI_SOURCE
+        << " with president id " << msg;
       }
     }
   }
+  std::cout << rank_ << " flag " << flag << std::endl;
   if (!flag) //right node is dead
   {
+    std::cout << rank_ << " didn't get answer from " << right_id_ << std::endl;
     right_id_ = (right_id_ + 1) % world_size_;
-    send_token(tag, electionEnded);
+    send_token(tag, electionEnded, last_sent_rank);
   }
-  // received Tag::ElectionConfirmation
+  else if (status.MPI_TAG == Tag::ElectionConfirmation)
+  { 
+    std::cout << rank_ << " received a confirmation from " << status.MPI_SOURCE << std::endl;
+  }
+  else if (status.MPI_TAG == Tag::Election)
+  {
+    std::cout << rank_ << " ? (tag: " << status.MPI_TAG
+    << " / source: " << status.MPI_SOURCE << ")" <<  std::endl;
+  }
+  
 }
 
 /**
@@ -147,47 +174,86 @@ void Process::send_token(const int tag, int& electionEnded)
  */
 void Process::elect_president()
 {
-  std::cout << "Begin President" << std::endl;
-  int electionEnded = false;
-  while (!electionEnded)
+  //std::cout << rank_ << " Begin President" << std::endl;
+  bool has_ended = false;
+  bool should_end = false;
+  int i = 0;
+  while (!has_ended)
   {
-    send_token(Tag::Election, electionEnded);
+    int rec, rec2;
+    MPI_Request reqr, reqr2;
+    int flag = 0;
+    int flag2 = 0;
+    MPI_Status status, status2;
+    MPI_Irecv(&rec, 1, MPI_INT, MPI_ANY_SOURCE, Tag::Election, MPI_COMM_WORLD, &reqr);
+    MPI_Irecv(&rec2, 1, MPI_INT, MPI_ANY_SOURCE, Tag::Endelection, MPI_COMM_WORLD, &reqr2);
+    MPI_Send(&president_id_, 1, MPI_INT, right_id_, Tag::Election, MPI_COMM_WORLD);
+    MPI_Test(&reqr, &flag, &status);
+    MPI_Test(&reqr2, &flag2, &status2);
+    while (!flag && !flag2)
+    {
+      MPI_Test(&reqr, &flag, &status);
+      MPI_Test(&reqr2, &flag2, &status2);
+    }
+    if (flag)
+    {
+      MPI_Cancel(&reqr2);
+    }
+    else if (flag2)
+    {
+      MPI_Cancel(&reqr);
+      has_ended = true;
+      break;
+    }
+    
+    if (flag && rec > president_id_)
+      president_id_ = rec;
+    else if (flag && rec == rank_)
+    {
+      president_id_ = rank_;
+      type_ = Type::President;
+      has_ended = true;
+      std::cout << rank_ << " is the president" << std::endl;
+    }
+    int rec3;
+    MPI_Request reqr3;
+    MPI_Status status3;
+    MPI_Irecv(&rec3, 1, MPI_INT, MPI_ANY_SOURCE, Tag::ElectionConfirmation, MPI_COMM_WORLD, &reqr3);
+    MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD);
+    MPI_Wait(&reqr3, &status3);
   }
-
-  int msg;
-  /**
-   * If I'm the president I must wait that my right node sends me an EndElection tag.
-   */
   if (type_ == Type::President)
   {
-    MPI_Recv(&msg,1,MPI_INT,right_id_, Tag::Endelection, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    for (auto& w: workers_)
+    int rec, rec2;
+    MPI_Request reqr, reqr2;
+    int flag = 0;
+    MPI_Status status, status2;
+    MPI_Irecv(&rec, 1, MPI_INT, MPI_ANY_SOURCE, Tag::Election, MPI_COMM_WORLD, &reqr);
+    MPI_Send(&president_id_, 1, MPI_INT, right_id_, Tag::Endelection, MPI_COMM_WORLD);
+    MPI_Wait(&reqr, &status);
+    MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD);
+    while(1)
     {
-      if (w == rank_)
-        continue;
-      MPI_Send(&president_id_,1, MPI_INT, w, Tag::Endelection, MPI_COMM_WORLD);
+      MPI_Recv(&rec2, 1, MPI_INT, left_id_, MPI_ANY_SOURCE, MPI_COMM_WORLD, &status);
+      if (status.MPI_TAG == Tag::Endelection)
+        break;
+      else
+        MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD);
     }
   }
   else
   {
-    /**
-     * if I'm not the president but I received Endelection from right
-     * I must wait a Tag::Election from left and I must answer with Tag::Endelection
-     * However if left is the president, that means that EndElection has been received by
-     * everyone. Thus we can send him a message to tell him to president election is over
-     */
-    if (left_id_ == president_id_) 
-    {
-      MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::Endelection, MPI_COMM_WORLD);
-    }
-    else
-    {
-      MPI_Recv(&msg, 1, MPI_INT, left_id_, Tag::Election, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      MPI_Send(&president_id_, 1, MPI_INT, left_id_, Tag::Endelection, MPI_COMM_WORLD);
-    }
+    int rec, rec2;
+    MPI_Request reqr, reqr2;
+    int flag = 0;
+    int flag2 = 0;
+    MPI_Status status, status2;
+    MPI_Recv(&rec, 1, MPI_INT, right_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD, &status);
+    MPI_Send(&president_id_, 1, MPI_INT, right_id_, Tag::Endelection, MPI_COMM_WORLD);
   }
+  std::cout << rank_ << std::endl;
   
-} 
+}
 
 void Process::elect_masters()
 {
