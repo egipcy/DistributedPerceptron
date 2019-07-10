@@ -54,7 +54,7 @@ public:
   void upgrade_to_master(std::vector<int> masters);
   void master_to_president();
 
-  void save_nn(const std::string& filename, int n_epoch) const;
+  void save_nn(const std::string& filename, int n_epoch);
   void load_nn(const std::string& filename);
   bool is_alive() const;
   void set_alive(bool alive);

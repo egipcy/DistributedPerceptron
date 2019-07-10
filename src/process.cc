@@ -151,9 +151,10 @@ void Process::master_to_president()
 }
 
 
-void Process::save_nn(const std::string& filename, int n_epoch) const
+void Process::save_nn(const std::string& filename, int n_epoch) 
 {
   nn_.save(filename, n_epoch);
+  i_epoch_ = n_epoch;
 }
 
 void Process::load_nn(const std::string& filename)
