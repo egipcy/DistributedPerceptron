@@ -57,10 +57,11 @@ int main()
     nn.update_simple(p.first, p.second, 0.1);
   }
 
-  nn.save("test.nn");
+  nn.save("test.nn",1000);
   NN nn2;
-  nn2.load("test.nn");
-
+  int nb_epochs =  nn2.load("test.nn");
+  std::cout << nb_epochs << std::endl;
+  
   std::cout << std::endl << "Results" << std::endl;
   nn2.print();
 

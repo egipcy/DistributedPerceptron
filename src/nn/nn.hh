@@ -35,8 +35,8 @@ public:
 
   void print() const;
 
-  void save(const std::string& filename) const;
-  void load(const std::string& filename);
+  void save(const std::string& filename, int i_epochs) const;
+  int load(const std::string& filename);
 
 private:
   std::vector<Matrix> weights_;

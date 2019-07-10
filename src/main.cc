@@ -14,7 +14,7 @@ int main(int argc, char** argv)
   std::vector<double> kill_ids = {9, 8};
 
   int debug = 0;
-  if (argc != 4)
+  if (argc < 4)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
     std::cerr << "Arguments : data's path, config's path, neural network's path" << std::endl;
@@ -27,7 +27,8 @@ int main(int argc, char** argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   
   Process p = Process(rank, world_size, argv[1], argv[2]);
-
+  if(argc == 5)
+    p.set_need_load();
   //std::cout << p.get_rank() << " Election..." << std::endl;
   p.elect_president();
   //std::cout << p.get_rank() << " END Election" << std::endl;
@@ -36,6 +37,12 @@ int main(int argc, char** argv)
     std::cout << p.get_rank() << " is President" << std::endl;
     p.elect_masters();
     p.init_nn();
+    if(p.get_need_load())
+    {
+      std::cout << "load file" << std::endl;
+      p.load_nn(argv[4]);
+    }
+    std::cout << p.get_epoch() << std::endl;
     p.send_weights_all();
   }
 
@@ -45,8 +52,8 @@ int main(int argc, char** argv)
 
   MPI_Status status;
   int count;
-  int nb_pass = 0;
   int nb_save = 0;
+  int nb_pass = 0;
   while (!p.has_ended())
   {
     for (size_t i = 0; i < kill_timeouts.size(); i++)
@@ -144,21 +151,24 @@ int main(int argc, char** argv)
       }
       else if (p.get_type() == Type::Master)
       {
+        nb_pass++;
         p.set_weights_biases(w, b);
         //std::cout << "Master write the saving file" <<  std::endl;
         std::stringstream filename;
+        std::cout << "SAVE #" << p.get_time_to_save() * nb_pass << std::endl;
         filename << "Save_master_" << p.get_rank();
-        p.save_nn(filename.str());
+        p.save_nn(filename.str(),p.get_time_to_save() * nb_pass);
       }
       else // if (p.get_type() == Type::President)
       {
         //std::cout << p.get_rank() << " President receive gradients" << std::endl;
-        nb_pass++;
         p.update_nn(w, b);
+        // p.update_nn_delayed1(w, b, status.MPI_SOURCE, 2.0);
+        // p.update_nn_delayed2(w, b, status.MPI_SOURCE, 0.04);
 
         if (p.has_ended())
         {
-          p.save_nn(argv[3]);
+          p.save_nn(argv[3], p.get_epoch());
           p.end_all(); // send the tag Finished to everybody
         }
 
@@ -166,10 +176,9 @@ int main(int argc, char** argv)
 
         p.send_weights(status.MPI_SOURCE);
 
-        if(nb_pass % p.get_time_to_save() == 0)
+        if (p.get_epoch() % p.get_time_to_save() == 0)
         {
           nb_save++;
-          std::cout << "SAVE #" << nb_save << std::endl;
           p.send_weights_to_master();
         }
       }

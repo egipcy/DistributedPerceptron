@@ -52,7 +52,7 @@ std::pair<Matrix, std::vector<Matrix>> NN::forward(const Matrix& inputs)
 
   for (size_t i_layer = 0; i_layer < weights_.size(); i_layer++)
   {
-    weighted_sums.emplace_back(activated_sum.dot(weights_[i_layer])/* + biases_[i_layer][0][0]*/);
+    weighted_sums.emplace_back(activated_sum.dot(weights_[i_layer]));
     activated_sum = weighted_sums[i_layer].map(NN::activation_function);
   }
   return std::pair(activated_sum, weighted_sums);
@@ -145,7 +145,7 @@ void NN::print() const
     biases_[i].print();
 }
 
-void NN::save(const std::string& filename) const
+void NN::save(const std::string& filename, int i_epochs) const
 {
   std::ofstream file(filename);
   if(!file.is_open())
@@ -165,10 +165,11 @@ void NN::save(const std::string& filename) const
     file << e << " ";
   file << "\n";
 
+  file << i_epochs << "\n";
   file.close();
 }
 
-void NN::load(const std::string& filename)
+int NN::load(const std::string& filename)
 {
   std::ifstream file(filename);
   if(!file.is_open())
@@ -179,7 +180,7 @@ void NN::load(const std::string& filename)
 
   std::vector<double> w;
   std::vector<double> b;
-
+  int nb_epochs = 0;
   std::string line;
 
   std::getline(file, line);
@@ -193,9 +194,10 @@ void NN::load(const std::string& filename)
 
   for(double e = 0; ss2 >> e;)
     b.push_back(e);
-
+  std::getline(file, line);
+  nb_epochs = std::stoi(line);
   file.close();
-
   weights_ = deserialize(w);
   biases_ = deserialize(b);
+  return nb_epochs;
 }

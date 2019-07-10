@@ -14,9 +14,11 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   , right_id_((rank_ + 1) % world_size_)
   , president_id_(rank)
   , type_(Type::Worker)
+  , old_nns_(std::vector<NN>(world_size_))
   , i_epoch_(0)
   , alive_(true)
   , has_ended_(false)
+  ,need_load_file(false)
 {
   left_id_ = rank - 1 < 0 ? world_size_ - 1 : rank - 1;
   init_datas(filename_data);
@@ -28,10 +30,21 @@ int Process::get_rank() const
   return rank_;
 }
 
+bool Process::get_need_load() const
+{
+  return need_load_file;
+}
+
+int Process::get_epoch() const
+{
+  return i_epoch_;
+}
+
 Type Process::get_type() const
 {
   return type_;
 }
+
 int Process::get_time_to_save() const
 {
   return parameters_.time_save;
@@ -46,10 +59,21 @@ void Process::set_president(const int president_id)
   president_id_ = president_id;
 }
 
+void Process::set_need_load()
+{
+  need_load_file = true;
+}
+
 void Process::set_type(Type type)
 {
   type_ = type;
 }
+/*
+void Process::set_i_epoch(int currently_epochs)
+{
+  i_epoch_ = currently_epochs;
+ }*/
+
 void Process::upgrade_to_master(std::vector<int> masters)
 {
   type_ = Type::Master;
@@ -127,9 +151,15 @@ void Process::master_to_president()
 }
 
 
-void Process::save_nn(const std::string& filename) const
+void Process::save_nn(const std::string& filename, int n_epoch) const
 {
-  nn_.save(filename);
+  nn_.save(filename, n_epoch);
+}
+
+void Process::load_nn(const std::string& filename)
+{
+  i_epoch_ = nn_.load(filename);
+  std::cout << i_epoch_ << std::endl;
 }
 
 bool Process::is_alive() const
@@ -367,7 +397,6 @@ void Process::init_parameters(const std::string& filename_parameters)
 
 void Process::send_weights(int dest)
 {
- 
   std::vector<double> weights = serialize(nn_.get_weights());
   
   MPI_Send(weights.data(), weights.size(), MPI_DOUBLE, dest, Tag::WeightsMatrix, MPI_COMM_WORLD);
@@ -375,6 +404,8 @@ void Process::send_weights(int dest)
   std::vector<double> biases = serialize(nn_.get_biases());
   
   MPI_Send(biases.data(), biases.size(), MPI_DOUBLE, dest, Tag::BiasesMatrix, MPI_COMM_WORLD);
+
+  old_nns_[dest] = nn_;
 }
 
 void Process::send_weights_all()
@@ -402,24 +433,31 @@ std::pair<std::vector<Matrix>, std::vector<Matrix>> Process::get_gradients()
 void Process::update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b)
 {
   nn_.update_simple(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate);
+
   if (++i_epoch_ == parameters_.nb_epochs)
     has_ended_ = true;
 }
 
-void Process::update_nn_delayed1(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
-  const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda)
+void Process::update_nn_delayed1(const std::vector<double>& gradients_w,
+  const std::vector<double>& gradients_b, int source, double lambda)
 {
-  nn_.update_delayed1(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate,
-    old_weights, old_biases, lambda);
+  assert(source < old_nns_.size());
+
+  nn_.update_delayed1(deserialize(gradients_w), deserialize(gradients_b),
+    parameters_.learning_rate, old_nns_[source].get_weights(), old_nns_[source].get_biases(), lambda);
+
   if (++i_epoch_ == parameters_.nb_epochs)
     has_ended_ = true;
 }
 
-void Process::update_nn_delayed2(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
-  const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda)
+void Process::update_nn_delayed2(const std::vector<double>& gradients_w,
+  const std::vector<double>& gradients_b, int source, double lambda)
 {
-  nn_.update_delayed2(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate,
-    old_weights, old_biases, lambda);
+  assert(source < old_nns_.size());
+
+  nn_.update_delayed2(deserialize(gradients_w), deserialize(gradients_b),
+    parameters_.learning_rate, old_nns_[source].get_weights(), old_nns_[source].get_biases(), lambda);
+
   if (++i_epoch_ == parameters_.nb_epochs)
     has_ended_ = true;
 }

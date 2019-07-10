@@ -45,12 +45,17 @@ public:
   int get_time_to_save() const;
   int get_president() const;
   void set_president(const int president_id);
+  int get_epoch() const; 
+  bool get_need_load() const;
 
+  // void set_i_epoch(int currently_epochs);
+  void set_need_load();
   void set_type(Type type);
   void upgrade_to_master(std::vector<int> masters);
   void master_to_president();
-  void save_nn(const std::string& filename) const;
 
+  void save_nn(const std::string& filename, int n_epoch) const;
+  void load_nn(const std::string& filename);
   bool is_alive() const;
   void set_alive(bool alive);
 
@@ -72,10 +77,10 @@ public:
   void set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases);
   std::pair<std::vector<Matrix>, std::vector<Matrix>> get_gradients();
   void update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b);
-  void update_nn_delayed1(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
-    const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda);
-  void update_nn_delayed2(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
-    const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda);
+  void update_nn_delayed1(const std::vector<double>& gradients_w,
+  const std::vector<double>& gradients_b, int source, double lambda);
+  void update_nn_delayed2(const std::vector<double>& gradients_w,
+  const std::vector<double>& gradients_b, int source, double lambda);
 
 private:
   int rank_;
@@ -89,6 +94,7 @@ private:
   Type type_;
 
   NN nn_;
+  std::vector<NN> old_nns_;
   int i_epoch_;
 
   std::pair<Matrix, Matrix> datas_;
@@ -99,4 +105,5 @@ private:
 
   Parameters parameters_;
   void init_parameters(const std::string& filename_parameters);
+  bool need_load_file;
 };
