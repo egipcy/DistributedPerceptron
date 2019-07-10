@@ -10,8 +10,8 @@
 
 int main(int argc, char** argv)
 {
-  std::vector<double> kill_times = {1.0};
-  std::vector<double> kill_ids = {7};
+  std::vector<double> kill_times = {2.0, 3.7};
+  std::vector<double> kill_ids = {7, 8};
 
   int debug = 0;
   if (argc != 4)
@@ -143,7 +143,7 @@ int main(int argc, char** argv)
         if(nb_pass % p.get_time_to_save() == 0)
         {
           nb_save++;
-          std::cout << "The president send nn to master for the " << nb_save << std::endl;
+          std::cout << "SAVE #" << nb_save << std::endl;
           p.send_weights_to_master();
         }
       }
