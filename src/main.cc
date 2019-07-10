@@ -27,8 +27,6 @@ int main(int argc, char** argv)
   //std::cout << p.get_rank() << " Election..." << std::endl;
   p.elect_president();
   //std::cout << p.get_rank() << " ND Election" << std::endl;
-  MPI_Finalize();
-  return 0;
   if (p.get_type() == Type::President)
   {
     std::cout << p.get_rank() << " is President" << std::endl;
