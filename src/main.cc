@@ -133,9 +133,9 @@ int main(int argc, char** argv)
       else // if (p.get_type() == Type::President)
       {
         //std::cout << p.get_rank() << " President receive gradients" << std::endl;
-        p.update_nn(w, b);
-        // p.update_nn_delayed1(w, b, status.MPI_SOURCE, 2.0);
-        // p.update_nn_delayed2(w, b, status.MPI_SOURCE, 0.04);
+        //p.update_nn(w, b);
+        //p.update_nn_delayed1(w, b, status.MPI_SOURCE, 2.0);
+        p.update_nn_delayed2(w, b, status.MPI_SOURCE, 0.04);
 
         if (p.has_ended())
         {
