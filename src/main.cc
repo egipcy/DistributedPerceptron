@@ -133,6 +133,8 @@ int main(int argc, char** argv)
         //std::cout << p.get_rank() << " President receive gradients" << std::endl;
         nb_pass++;
         p.update_nn(w, b);
+        // p.update_nn_delayed1(w, b, status.MPI_SOURCE, 2.0);
+        // p.update_nn_delayed2(w, b, status.MPI_SOURCE, 0.04);
 
         if (p.has_ended())
         {
@@ -144,7 +146,7 @@ int main(int argc, char** argv)
 
         p.send_weights(status.MPI_SOURCE);
 
-        if(nb_pass % p.get_time_to_save() == 0)
+        if (nb_pass % p.get_time_to_save() == 0)
         {
           nb_save++;
           std::cout << "SAVE #" << nb_save << std::endl;
