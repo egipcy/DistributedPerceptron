@@ -47,6 +47,21 @@ int main(int argc, char** argv)
   int count;
   while (!p.has_ended())
   {
+    for (size_t i = 0; i < kill_timeouts.size(); i++)
+      if (!kill_timeouts[i]())
+      {
+        if (kill_ids[i] == p.get_rank())
+        {
+          std::cout << p.get_rank() << " gets killed" << std::endl;
+          MPI_Finalize();
+          return 0;
+        }
+        kill_timeouts.erase(kill_timeouts.begin() + i);
+        kill_times.erase(kill_times.begin() + i);
+        kill_ids.erase(kill_ids.begin() + i);
+        i--;
+      }
+
     int flag = false;
     Type ptype = p.get_type();
     if (ptype == Type::President || ptype == Type::Worker)
