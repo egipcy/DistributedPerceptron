@@ -28,6 +28,10 @@ int Process::get_rank() const
   return rank_;
 }
 
+int Process::get_epoch() const
+{
+  return i_epoch_;
+}
 Type Process::get_type() const
 {
   return type_;
@@ -47,9 +51,9 @@ void Process::upgrade_to_master(std::vector<int> masters)
   masters_ = masters;
 }
 
-void Process::save_nn(const std::string& filename) const
+void Process::save_nn(const std::string& filename, int n_epoch) const
 {
-  nn_.save(filename);
+  nn_.save(filename, n_epoch);
 }
 
 bool Process::is_alive() const
