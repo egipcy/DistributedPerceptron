@@ -16,6 +16,7 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   , i_epoch_(0)
   , alive_(true)
   , has_ended_(false)
+  ,need_load_file(false)
 {
   left_id_ = rank - 1 < 0 ? world_size_ - 1 : rank - 1;
   init_datas(filename_data);
@@ -27,23 +28,41 @@ int Process::get_rank() const
   return rank_;
 }
 
+bool Process::get_need_load() const
+{
+  return need_load_file;
+}
+
 int Process::get_epoch() const
 {
   return i_epoch_;
 }
+
 Type Process::get_type() const
 {
   return type_;
 }
+
 int Process::get_time_to_save() const
 {
   return parameters_.time_save;
+}
+
+void Process::set_need_load()
+{
+  need_load_file = true;
 }
 
 void Process::set_type(Type type)
 {
   type_ = type;
 }
+/*
+void Process::set_i_epoch(int currently_epochs)
+{
+  i_epoch_ = currently_epochs;
+ }*/
+
 void Process::upgrade_to_master(std::vector<int> masters)
 {
   type_ = Type::Master;
@@ -53,6 +72,12 @@ void Process::upgrade_to_master(std::vector<int> masters)
 void Process::save_nn(const std::string& filename, int n_epoch) const
 {
   nn_.save(filename, n_epoch);
+}
+
+void Process::load_nn(const std::string& filename)
+{
+  i_epoch_ = nn_.load(filename);
+  std::cout << i_epoch_ << std::endl;
 }
 
 bool Process::is_alive() const

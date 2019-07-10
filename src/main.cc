@@ -14,7 +14,7 @@ int main(int argc, char** argv)
   std::vector<double> kill_ids = {7, 8};
 
   int debug = 0;
-  if (argc != 4)
+  if (argc < 4)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
     std::cerr << "Arguments : data's path, config's path, neural network's path" << std::endl;
@@ -27,7 +27,8 @@ int main(int argc, char** argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   Process p = Process(rank, world_size, argv[1], argv[2]);
-
+  if(argc == 5)
+    p.set_need_load();
   //std::cout << p.get_rank() << " Election..." << std::endl;
   p.elect_president();
   //std::cout << p.get_rank() << " END Election" << std::endl;
@@ -36,6 +37,12 @@ int main(int argc, char** argv)
     std::cout << p.get_rank() << " is President" << std::endl;
     p.elect_masters();
     p.init_nn();
+    if(p.get_need_load())
+    {
+      std::cout << "load file" << std::endl;
+      p.load_nn(argv[4]);
+    }
+    std::cout << p.get_epoch() << std::endl;
     p.send_weights_all();
   }
 
