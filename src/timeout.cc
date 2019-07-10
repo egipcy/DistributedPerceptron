@@ -2,6 +2,7 @@
 #include <time.h>
 #include <functional>
 #include <iostream>
+
 std::function<bool()> generate_timer(double timeout)
 {
   int start_t = clock();

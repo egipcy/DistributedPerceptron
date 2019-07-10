@@ -32,12 +32,15 @@ Type Process::get_type() const
 {
   return type_;
 }
+int Process::get_time_to_save() const
+{
+  return parameters_.time_save;
+}
 
 void Process::set_type(Type type)
 {
   type_ = type;
 }
-
 void Process::upgrade_to_master(std::vector<int> masters)
 {
   type_ = Type::Master;
@@ -181,8 +184,6 @@ void Process::elect_president()
       has_ended = true;
       break;
     }
-    
-    
     if (flag && rec > president_id_)
       president_id_ = rec;
     else if (flag && rec == rank_)
@@ -228,8 +229,6 @@ void Process::elect_president()
     MPI_Recv(&rec, 1, MPI_INT, right_id_, Tag::ElectionConfirmation, MPI_COMM_WORLD, &status);
     MPI_Send(&president_id_, 1, MPI_INT, right_id_, Tag::Endelection, MPI_COMM_WORLD);
   }
-  std::cout << rank_ << std::endl;
-  
 }
 
 void Process::elect_masters()
@@ -334,6 +333,8 @@ void Process::init_parameters(const std::string& filename_parameters)
       parameters_.nb_epochs = std::stoi(value);
     else if (param == "ratio")
       parameters_.ratio = std::stod(value);
+    else if (param == "time_save")
+      parameters_.time_save = std::stod(value);
     else
       std::cerr << "Unknown parameter: " << param << std::endl;
   }
@@ -357,6 +358,12 @@ void Process::send_weights_all()
     send_weights(w);
 }
 
+void Process::send_weights_to_master()
+{
+  for (auto w: masters_)
+    send_weights(w);
+}
+
 void Process::set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases)
 {
   nn_ = NN(deserialize(weights), deserialize(biases));
@@ -370,6 +377,24 @@ std::pair<std::vector<Matrix>, std::vector<Matrix>> Process::get_gradients()
 void Process::update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b)
 {
   nn_.update_simple(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate);
+  if (++i_epoch_ == parameters_.nb_epochs)
+    has_ended_ = true;
+}
+
+void Process::update_nn_delayed1(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
+  const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda)
+{
+  nn_.update_delayed1(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate,
+    old_weights, old_biases, lambda);
+  if (++i_epoch_ == parameters_.nb_epochs)
+    has_ended_ = true;
+}
+
+void Process::update_nn_delayed2(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
+  const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda)
+{
+  nn_.update_delayed2(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate,
+    old_weights, old_biases, lambda);
   if (++i_epoch_ == parameters_.nb_epochs)
     has_ended_ = true;
 }
