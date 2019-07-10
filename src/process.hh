@@ -43,11 +43,11 @@ public:
   int get_rank() const;
   Type get_type() const;
   int get_time_to_save() const;
-
+  int get_epoch() const;
   void set_type(Type type);
   void upgrade_to_master(std::vector<int> masters);
 
-  void save_nn(const std::string& filename) const;
+  void save_nn(const std::string& filename, int n_epoch) const;
 
   bool is_alive() const;
   void set_alive(bool alive);
