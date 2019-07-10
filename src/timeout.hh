@@ -1,5 +1,8 @@
+#pragma once
 #include <time.h>
 
+#define _ELECTION_ANSWER_TIMEOUT_ 5 //seconds
+#define _MASTER_WAIT_TIMEOUT_ 5 //seconds
 
 /**
  * Returns a function that returns true if the timer has been

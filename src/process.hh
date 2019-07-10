@@ -5,7 +5,6 @@
 #include "nn/nn.hh"
 #include "matrix/matrix.hh"
 
-#define _ELECTION_ANSWER_TIMEOUT_ 5 //seconds
 
 struct Parameters
 {
@@ -55,7 +54,6 @@ public:
   void end();
   void end_all() const;
 
-  void send_token(const int tag, int& electionEnded, int& last_sent_rank);
   void elect_president();
   void elect_masters();
   void init_nn();
