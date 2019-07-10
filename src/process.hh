@@ -69,6 +69,10 @@ public:
   void set_weights_biases(const std::vector<double>& weights, const std::vector<double>& biases);
   std::pair<std::vector<Matrix>, std::vector<Matrix>> get_gradients();
   void update_nn(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b);
+  void update_nn_delayed1(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
+    const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda);
+  void update_nn_delayed2(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
+    const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda);
 
 private:
   int rank_;
