@@ -54,6 +54,7 @@ public:
   void end();
   void end_all() const;
 
+  void send_token(const int tag, int& electionEnded, int& last_sent_rank);
   void elect_president();
   void elect_masters();
   void init_nn();
