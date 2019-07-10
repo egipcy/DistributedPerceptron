@@ -15,7 +15,7 @@
 int main(int argc, char** argv)
 {
   std::vector<double> kill_times = {2.0, 3.7};
-  std::vector<double> kill_ids = {7, 8};
+  std::vector<double> kill_ids = {9, 8};
 
   int debug = 0;
   if (argc < 4)
