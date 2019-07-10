@@ -8,10 +8,14 @@
 #include "matrix/matrix.hh"
 #include "timeout.hh"
 
+// Paper: https://pdfs.semanticscholar.org/57fa/e54a8252e6a2acb211616a3a0d66553a758e.pdf
+
+#define FORMULA 2 // Choose from {0=basic, 1=paper formula (9), 2=paper formula (10)}
+
 int main(int argc, char** argv)
 {
   std::vector<double> kill_times = {2.0, 3.7};
-  std::vector<double> kill_ids = {9, 8};
+  std::vector<double> kill_ids = {7, 8};
 
   int debug = 0;
   if (argc < 4)
@@ -151,7 +155,13 @@ int main(int argc, char** argv)
       }
       else // if (p.get_type() == Type::President)
       {
-        p.update_nn(w, b);
+        #if FORMULA == 0
+          p.update_nn(w, b);
+        #elif FORMULA == 1
+          p.update_nn_delayed1(w, b, status.MPI_SOURCE, 2.0);
+        #else
+          p.update_nn_delayed2(w, b, status.MPI_SOURCE, 0.04);
+        #endif
 
         if (p.has_ended())
         {

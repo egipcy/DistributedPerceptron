@@ -115,7 +115,8 @@ void NN::update_delayed1(const std::vector<Matrix>& gradients_w,
   for (size_t i = 0; i < weights_.size(); i++)
   {
     weights_[i] -= learning_rate * (gradients_w[i] + lambda * gradients_w[i].map(std::abs) * (weights_[i] - old_weights[i]));
-    biases_[i] -= learning_rate * (gradients_b[i] + lambda * gradients_b[i].map(std::abs) * (biases_[i] - old_biases[i]));
+    auto g_b = Matrix(1, gradients_b[i].rows(), 1.0).dot(gradients_b[i]);
+    biases_[i] -= learning_rate * (g_b + lambda * g_b.map(std::abs) * (biases_[i] - old_biases[i]));
   }
 }
 
@@ -130,7 +131,8 @@ void NN::update_delayed2(const std::vector<Matrix>& gradients_w,
   for (size_t i = 0; i < weights_.size(); i++)
   {
     weights_[i] -= learning_rate * (gradients_w[i] + lambda * gradients_w[i] * gradients_w[i] * (weights_[i] - old_weights[i]));
-    biases_[i] -= learning_rate * (gradients_b[i] + lambda * gradients_b[i] * gradients_b[i] * (biases_[i] - old_biases[i]));
+    auto g_b = Matrix(1, gradients_b[i].rows(), 1.0).dot(gradients_b[i]);
+    biases_[i] -= learning_rate * (g_b + lambda * g_b * g_b * (biases_[i] - old_biases[i]));
   }
 }
 
