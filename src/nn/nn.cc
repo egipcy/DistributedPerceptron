@@ -166,7 +166,6 @@ void NN::save(const std::string& filename, int i_epochs) const
   for (auto e: b)
     file << e << " ";
   file << "\n";
-
   file << i_epochs << "\n";
   file.close();
 }
