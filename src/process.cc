@@ -5,6 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <stdlib.h>
 #include "timeout.hh"
+#include <algorithm>
 
 Process::Process(int rank, int world_size, const std::string& filename_data,
   const std::string& filename_parameters)
@@ -17,6 +18,7 @@ Process::Process(int rank, int world_size, const std::string& filename_data,
   , i_epoch_(0)
   , alive_(true)
   , has_ended_(false)
+  ,need_load_file(false)
 {
   left_id_ = rank - 1 < 0 ? world_size_ - 1 : rank - 1;
   init_datas(filename_data);
@@ -28,32 +30,136 @@ int Process::get_rank() const
   return rank_;
 }
 
+bool Process::get_need_load() const
+{
+  return need_load_file;
+}
+
 int Process::get_epoch() const
 {
   return i_epoch_;
 }
+
 Type Process::get_type() const
 {
   return type_;
 }
+
 int Process::get_time_to_save() const
 {
   return parameters_.time_save;
+}
+
+int Process::get_president() const
+{
+  return president_id_;
+}
+void Process::set_president(const int president_id)
+{
+  president_id_ = president_id;
+}
+
+void Process::set_need_load()
+{
+  need_load_file = true;
 }
 
 void Process::set_type(Type type)
 {
   type_ = type;
 }
+/*
+void Process::set_i_epoch(int currently_epochs)
+{
+  i_epoch_ = currently_epochs;
+ }*/
+
 void Process::upgrade_to_master(std::vector<int> masters)
 {
   type_ = Type::Master;
   masters_ = masters;
+  if (masters_.size() == 1)
+  {
+    left_id_ = rank_;
+    right_id_ = rank_;
+  }
+  else
+  {
+    bool has_left = false;
+    bool has_right = false;
+    for (int i = rank_ - 1; i >= 0; i--)
+    {
+      if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+      {
+        left_id_ = i;
+        has_left = true;
+        break;
+      }
+    }
+    if (has_left == false)
+    {
+      for (int i = world_size_ - 1; i > rank_; i--)
+      {
+        if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+        {
+          left_id_ = i;
+          has_left = true;
+          break;
+        }
+      }
+    }
+
+    for (int i = rank_ + 1; i < world_size_; i++)
+    {
+      if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+      {
+        right_id_ = i;
+        has_right = true;
+        break;
+      }
+    }
+    if (has_right == false)
+    {
+      for (int i = 0; i < rank_; i++)
+      {
+        if(std::find(masters_.begin(), masters_.end(), i) != masters_.end())
+        {
+          right_id_ = i;
+          has_right = true;
+          break;
+        }
+      }
+    }
+  }
+  std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
 }
+
+void Process::master_to_president()
+{
+  int new_president = *std::max_element(masters_.begin(), masters_.end());
+  masters_.erase(std::find(masters_.begin(),masters_.end(), new_president));
+  if (new_president == rank_)
+  {
+    type_ = Type::President;
+    president_id_ = rank_;
+  }
+  else
+  {
+    president_id_ = new_president;
+    std::cout << rank_ << " has elected " << new_president << std::endl;
+  }
+}
+
 
 void Process::save_nn(const std::string& filename, int n_epoch) const
 {
   nn_.save(filename, n_epoch);
+}
+
+void Process::load_nn(const std::string& filename)
+{
+  i_epoch_ = nn_.load(filename);
+  std::cout << i_epoch_ << std::endl;
 }
 
 bool Process::is_alive() const

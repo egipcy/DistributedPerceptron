@@ -11,10 +11,10 @@
 int main(int argc, char** argv)
 {
   std::vector<double> kill_times = {2.0, 3.7};
-  std::vector<double> kill_ids = {7, 8};
+  std::vector<double> kill_ids = {9, 8};
 
   int debug = 0;
-  if (argc != 4)
+  if (argc < 4)
   {
     std::cerr << "Wrong number of arguments" << std::endl;
     std::cerr << "Arguments : data's path, config's path, neural network's path" << std::endl;
@@ -25,9 +25,10 @@ int main(int argc, char** argv)
   int rank, world_size;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
+  
   Process p = Process(rank, world_size, argv[1], argv[2]);
-
+  if(argc == 5)
+    p.set_need_load();
   //std::cout << p.get_rank() << " Election..." << std::endl;
   p.elect_president();
   //std::cout << p.get_rank() << " END Election" << std::endl;
@@ -36,6 +37,12 @@ int main(int argc, char** argv)
     std::cout << p.get_rank() << " is President" << std::endl;
     p.elect_masters();
     p.init_nn();
+    if(p.get_need_load())
+    {
+      std::cout << "load file" << std::endl;
+      p.load_nn(argv[4]);
+    }
+    std::cout << p.get_epoch() << std::endl;
     p.send_weights_all();
   }
 
@@ -76,17 +83,39 @@ int main(int argc, char** argv)
     else // p.get_type() == Type::Master
     {
       auto timer = generate_timer(_MASTER_WAIT_TIMEOUT_);
-      while (!flag && timer())
+      while (!flag)
       {
+        if (!timer())
+        {
+          std::cout << p.get_rank() << " says president is dead" << std::endl;
+          p.master_to_president();
+          if (p.get_type() == Type::President)
+          {
+            std::cout << "master " << p.get_rank() << " is the new president. " << std::endl;
+            p.send_weights_all();
+            status.MPI_TAG = -1;
+            break;
+          }
+          else
+          {
+            timer = generate_timer(_MASTER_WAIT_TIMEOUT_);
+          }
+        }
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
     }
-
-    // std::cout << p.get_rank() << " Received something tag=" << status.MPI_TAG  << " from " << status.MPI_SOURCE << std::endl;
-
     int t = status.MPI_TAG;
     if (t == Tag::WeightsMatrix)
     {
+      if (p.get_type() != Type::President)
+      {
+        if (status.MPI_SOURCE != p.get_president() && status.MPI_SOURCE != -1)
+        {
+          std::cout << p.get_rank() << "president was " << p.get_president() << " but now it's "
+          << status.MPI_SOURCE << std::endl;
+          p.set_president(status.MPI_SOURCE);
+        }
+      }
       //std::cout << p.get_rank() << " Matrix received" << std::endl;
       int count_weight = 0;
       int count_biais = 0;

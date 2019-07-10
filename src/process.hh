@@ -43,12 +43,19 @@ public:
   int get_rank() const;
   Type get_type() const;
   int get_time_to_save() const;
-  int get_epoch() const;
+  int get_president() const;
+  void set_president(const int president_id);
+  int get_epoch() const; 
+  bool get_need_load() const;
+
+  // void set_i_epoch(int currently_epochs);
+  void set_need_load();
   void set_type(Type type);
   void upgrade_to_master(std::vector<int> masters);
+  void master_to_president();
 
   void save_nn(const std::string& filename, int n_epoch) const;
-
+  void load_nn(const std::string& filename);
   bool is_alive() const;
   void set_alive(bool alive);
 
@@ -60,6 +67,7 @@ public:
   void elect_president();
   void elect_masters();
   void init_nn();
+
 
   /* Communication */
   void send_weights(int dest);
@@ -97,4 +105,5 @@ private:
 
   Parameters parameters_;
   void init_parameters(const std::string& filename_parameters);
+  bool need_load_file;
 };

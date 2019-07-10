@@ -197,11 +197,8 @@ int NN::load(const std::string& filename)
   for(double e = 0; ss2 >> e;)
     b.push_back(e);
   std::getline(file, line);
-  //std::stringstream ss3(line);
   nb_epochs = std::stoi(line);
-
   file.close();
-
   weights_ = deserialize(w);
   biases_ = deserialize(b);
   return nb_epochs;
