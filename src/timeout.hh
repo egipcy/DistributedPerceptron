@@ -14,4 +14,4 @@
  *    continue;
  *  std::cout << "3 seconds have passed" << std::endl;
  */
-std::function<bool()> generate_timer(int timeout);
+std::function<bool()> generate_timer(double timeout);

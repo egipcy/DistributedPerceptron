@@ -10,8 +10,8 @@
 
 int main(int argc, char** argv)
 {
-  std::vector<double> kill_times = {1.0, 2.5};
-  std::vector<double> kill_ids = {7, 8};
+  std::vector<double> kill_times = {1.0};
+  std::vector<double> kill_ids = {7};
 
   int debug = 0;
   if (argc != 4)
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
   while (!p.has_ended())
   {
     for (size_t i = 0; i < kill_timeouts.size(); i++)
-      if (!kill_timeouts[i])
+      if (!kill_timeouts[i]())
       {
         if (kill_ids[i] == p.get_rank())
         {
