@@ -328,3 +328,21 @@ void Process::update_nn(const std::vector<double>& gradients_w, const std::vecto
   if (++i_epoch_ == parameters_.nb_epochs)
     has_ended_ = true;
 }
+
+void Process::update_nn_delayed1(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
+  const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda)
+{
+  nn_.update_delayed1(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate,
+    old_weights, old_biases, lambda);
+  if (++i_epoch_ == parameters_.nb_epochs)
+    has_ended_ = true;
+}
+
+void Process::update_nn_delayed2(const std::vector<double>& gradients_w, const std::vector<double>& gradients_b,
+  const std::vector<Matrix>& old_weights, const std::vector<Matrix>& old_biases, double lambda)
+{
+  nn_.update_delayed2(deserialize(gradients_w), deserialize(gradients_b), parameters_.learning_rate,
+    old_weights, old_biases, lambda);
+  if (++i_epoch_ == parameters_.nb_epochs)
+    has_ended_ = true;
+}
