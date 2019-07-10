@@ -37,6 +37,15 @@ int Process::get_time_to_save() const
   return parameters_.time_save;
 }
 
+int Process::get_president() const
+{
+  return president_id_;
+}
+void Process::set_president(const int president_id)
+{
+  president_id_ = president_id;
+}
+
 void Process::set_type(Type type)
 {
   type_ = type;
@@ -98,9 +107,25 @@ void Process::upgrade_to_master(std::vector<int> masters)
       }
     }
   }
-
   std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
 }
+
+void Process::master_to_president()
+{
+  int new_president = *std::max_element(masters_.begin(), masters_.end());
+  masters_.erase(std::find(masters_.begin(),masters_.end(), new_president));
+  if (new_president == rank_)
+  {
+    type_ = Type::President;
+    president_id_ = rank_;
+  }
+  else
+  {
+    president_id_ = new_president;
+    std::cout << rank_ << " has elected " << new_president << std::endl;
+  }
+}
+
 
 void Process::save_nn(const std::string& filename) const
 {
@@ -153,7 +178,7 @@ void Process::end_all() const
  */
 void Process::elect_president()
 {
-  std::cout << rank_ << " Begin President" << std::endl;
+  //std::cout << rank_ << " Begin President" << std::endl;
   bool has_ended = false;
   bool should_end = false;
   int i = 0;

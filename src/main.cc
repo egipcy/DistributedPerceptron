@@ -11,7 +11,7 @@
 int main(int argc, char** argv)
 {
   std::vector<double> kill_times = {2.0, 3.7};
-  std::vector<double> kill_ids = {7, 8};
+  std::vector<double> kill_ids = {9, 8};
 
   int debug = 0;
   if (argc != 4)
@@ -80,17 +80,18 @@ int main(int argc, char** argv)
       {
         if (!timer())
         {
-          std::cout << "president is dead" << std::endl;
-          timer = [](){return true;};
-          p.elect_president();
-          if (ptype == Type::President)
+          std::cout << p.get_rank() << " says president is dead" << std::endl;
+          p.master_to_president();
+          if (p.get_type() == Type::President)
           {
-            std::cout << "master " << p.get_rank() << " is the new president. "
-            << "Tag: " << status.MPI_TAG << std::endl;
+            std::cout << "master " << p.get_rank() << " is the new president. " << std::endl;
             p.send_weights_all();
             status.MPI_TAG = -1;
-            std::cout << "Tag after modification " << status.MPI_TAG << std::endl;
             break;
+          }
+          else
+          {
+            timer = generate_timer(_MASTER_WAIT_TIMEOUT_);
           }
         }
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
@@ -99,6 +100,15 @@ int main(int argc, char** argv)
     int t = status.MPI_TAG;
     if (t == Tag::WeightsMatrix)
     {
+      if (p.get_type() != Type::President)
+      {
+        if (status.MPI_SOURCE != p.get_president() && status.MPI_SOURCE != -1)
+        {
+          std::cout << p.get_rank() << "president was " << p.get_president() << " but now it's "
+          << status.MPI_SOURCE << std::endl;
+          p.set_president(status.MPI_SOURCE);
+        }
+      }
       //std::cout << p.get_rank() << " Matrix received" << std::endl;
       int count_weight = 0;
       int count_biais = 0;
@@ -175,11 +185,6 @@ int main(int argc, char** argv)
       MPI_Recv(masters.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
       p.upgrade_to_master(masters);
     }
-    else if (t == Tag::Election && ptype == Type::Master)
-    {
-      p.elect_president();
-    }
-    
   }
 
   std::cout << p.get_rank() << " FINISH" << std::endl;

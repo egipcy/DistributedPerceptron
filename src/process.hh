@@ -43,10 +43,12 @@ public:
   int get_rank() const;
   Type get_type() const;
   int get_time_to_save() const;
+  int get_president() const;
+  void set_president(const int president_id);
 
   void set_type(Type type);
   void upgrade_to_master(std::vector<int> masters);
-
+  void master_to_president();
   void save_nn(const std::string& filename) const;
 
   bool is_alive() const;
@@ -60,6 +62,7 @@ public:
   void elect_president();
   void elect_masters();
   void init_nn();
+
 
   /* Communication */
   void send_weights(int dest);
