@@ -143,7 +143,7 @@ int main(int argc, char** argv)
         if(nb_pass % p.get_time_to_save() == 0)
         {
           nb_save++;
-          std::cout << "The president send nn to master for the " << nb_save << std::endl;
+          std::cout << "SAVE #" << nb_save << std::endl;
           p.send_weights_to_master();
         }
       }
