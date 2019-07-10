@@ -12,7 +12,7 @@
 
 int main(int argc, char** argv)
 {
-  std::vector<double> kill_times = {2.0, 3.7};
+  std::vector<double> kill_times = {2.0, 7.2};
   std::vector<double> kill_ids = {9, 8};
 
   int debug = 0;
@@ -82,11 +82,10 @@ int main(int argc, char** argv)
       {
         if (!timer())
         {
-          std::cout << p.get_rank() << " says president is dead" << std::endl;
           p.master_to_president();
           if (p.get_type() == Type::President)
           {
-            std::cout << "master " << p.get_rank() << " is the new president. " << std::endl;
+            std::cout << p.get_rank() << " is the new president. " << std::endl;
             p.send_weights_all();
             status.MPI_TAG = -1;
             break;
@@ -105,11 +104,7 @@ int main(int argc, char** argv)
       if (p.get_type() != Type::President)
       {
         if (status.MPI_SOURCE != p.get_president() && status.MPI_SOURCE != -1)
-        {
-          std::cout << p.get_rank() << "president was " << p.get_president() << " but now it's "
-          << status.MPI_SOURCE << std::endl;
           p.set_president(status.MPI_SOURCE);
-        }
       }
       int count_weight = 0;
       int count_biais = 0;
@@ -189,7 +184,6 @@ int main(int argc, char** argv)
     else if (t == Tag::StoreWorkers)
     {
       MPI_Get_count(&status, MPI_INT, &count);
-      //std::cout << "store workers " << count << std::endl;
       std::vector<int> workers(count);
       MPI_Recv(workers.data(), count, MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
       p.save_workers(workers);

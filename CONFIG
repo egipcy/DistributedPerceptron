@@ -2,6 +2,6 @@ nb_hidden_layers = 1
 nb_hidden_neurons = 3
 learning_rate = 0.01
 nb_epochs = 50000
-time_save = 1000
+time_save = 5000
 formula = 2
 lambda = 0.04

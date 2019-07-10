@@ -68,11 +68,6 @@ void Process::set_type(Type type)
 {
   type_ = type;
 }
-/*
-void Process::set_i_epoch(int currently_epochs)
-{
-  i_epoch_ = currently_epochs;
- }*/
 
 void Process::upgrade_to_master(const std::vector<int>& masters)
 {
@@ -131,7 +126,6 @@ void Process::upgrade_to_master(const std::vector<int>& masters)
       }
     }
   }
-  // std::cout << "master " << rank_ << " left: " << left_id_ << " right: " << right_id_ << std::endl;
 }
 
 void Process::save_workers(const std::vector<int>& workers)
@@ -150,10 +144,7 @@ void Process::master_to_president()
     president_id_ = rank_;
   }
   else
-  {
     president_id_ = new_president;
-    std::cout << rank_ << " has elected " << new_president << std::endl;
-  }
 }
 
 
@@ -214,7 +205,6 @@ void Process::end_all() const
  */
 void Process::elect_president()
 {
-  //std::cout << rank_ << " Begin President" << std::endl;
   bool has_ended = false;
   bool should_end = false;
   int i = 0;
@@ -294,8 +284,6 @@ void Process::elect_president()
 
 void Process::elect_masters()
 {
-  // TODO
-  // Fill masters_ and workers_ with their ranks and send type to masters
   int n_masters = world_size_ * parameters_.ratio;
 
   int workers_start = 0;
@@ -426,12 +414,8 @@ void Process::send_weights(int dest)
 
 void Process::send_weights_all()
 {
-  std::cout << "President " << rank_ << " sends weights to " << workers_.size() << " workers" << std::endl;
   for (auto w: workers_)
-  {
-    std::cout << "Sending weight to " << w << std::endl;
     send_weights(w);
-  }
 }
 
 void Process::send_weights_to_master()
