@@ -3,9 +3,9 @@
 #include <cassert>
 #include "mpi.h"
 
+#include "timeout.hh"
 #include "process.hh"
 #include "matrix/matrix.hh"
-
 
 int main(int argc, char** argv)
 {
@@ -40,17 +40,18 @@ int main(int argc, char** argv)
   while (!p.has_ended())
   {
     int flag = false;
-    while (!flag)
+    Type ptype = p.get_type();
+    if (ptype == Type::President || ptype == Type::Worker)
     {
-      if (p.get_type() == Type::President)
+      while (!flag)
       {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
-      else if (p.get_type() == Type::Worker)
-      {
-        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-      }
-      else // p.get_type() == Type::Master
+    }
+    else // p.get_type() == Type::Master
+    {
+      auto timer = generate_timer(_MASTER_WAIT_TIMEOUT_);
+      while (!flag && timer())
       {
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
       }
