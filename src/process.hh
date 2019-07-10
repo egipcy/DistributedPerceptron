@@ -14,6 +14,8 @@ struct Parameters
   int nb_epochs = 1000;
   double ratio = 0.3;
   int time_save = 100;
+  int formula = 2;
+  double lambda = 0.04;
 };
 
 enum class Type
@@ -67,6 +69,8 @@ public:
   void elect_president();
   void elect_masters();
   void init_nn();
+
+  const Parameters& get_parameters() const;
 
 
   /* Communication */

@@ -1,29 +1,50 @@
 Distributed Perceptron
 
-Reference:
-  Asynchronous Stochastic Gradient Descent with Delay Compensation for Distributed Deep Learning
-  Shuxin Zheng, Qi Meng, Taifeng Wang, Wei Chen, Nenghai Yu, Zhi-Ming Ma, Tie-Yan Liu
+REFERENCE
+  Asynchronous Stochastic Gradient Descent with Delay Compensation for
+    Distributed Deep Learning
+  Shuxin Zheng, Qi Meng, Taifeng Wang, Wei Chen, Nenghai Yu, Zhi-Ming Ma,
+    Tie-Yan Liu
   2016
 
-Given a file containing training datas, it builds 2 types of connected node:
-* master: inside a ring architecture.
-* worker: at extremities of a star architecture.
+DESCRIPTION
+  This project is a distributed multi-layer perceptron solving supervised
+    problems (features and labels are given).
+  It consists of a server having multiple clients.
+  The clients compute gradients using backpropagation.
+  The server aggregates gradients to solve the problem.
+  The problem is currently a XOR problem.
 
-In chronological order:
-1 it reads the given file to extract values and labels.
-2 it builds masters and workers with unique ids.
-3 masters elect a president among themselves.
-4 the president splits training datas and shares them to workers.
-5 the president initializes a weights matrix randomly.
-6 the president shares that matrix to workers.
-7 workers compute gradients according to datas owned.
-8 workers give gradients to the president.
-9 the president updates the weights matrix.
-10 go to 6.
-11 from time to time, the president shares its matrix with the other masters.
+USAGE
+  train.csv: for each line, features and label separated by a comma.
+  CONFIG: configuration files with some hyper-parameters.
+    * Formula: Choose from {0=basic, 1=paper formula (9), 2=paper formula (10)}.
+    * Lambda: lambda parameter associated to the formula.
+  NN.nn: save file.
 
-In case of failure:
-* the president crashes/get killed: masters elect a new president among themselves and shares it with other nodes.
-* a worker crashes/get killed: the president gives the worker's datas to other workers.
-* the old president comes back from the dead: no longer the president, ask for updated matrix.
-* a worker comes back from the dead: the president gives it datas and matrix.
+HOW IT WORKS
+  Given a file containing training datas, it builds 2 types of connected node:
+  * master: inside a ring architecture.
+  * worker: at extremities of a star architecture.
+
+  In chronological order:
+  1 it reads the given file to extract values and labels.
+  2 it builds masters and workers with unique ids.
+  3 masters elect a president among themselves.
+  4 the president initializes a weights matrix randomly.
+  5 the president shares that matrix to workers.
+  6 workers compute gradients according to datas owned.
+  7 workers give gradients to the president.
+  8 the president updates the weights matrix.
+  9 from time to time, the president shares its matrix with the other masters.
+  10 go to 5.
+
+FAILURES
+  Hard coded failures. Times and nodes are adjustable.
+
+  In case of failure:
+  * a worker crashes/gets killed: the president doesn't send him anything
+    anymore.
+  * a worker comes back from the dead: the president resume communications.
+  * the president crashes/get killed: masters elect a new president among
+    themselves and shares it with other nodes.

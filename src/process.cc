@@ -324,6 +324,11 @@ void Process::init_nn()
   nn_ = NN(v);
 }
 
+const Parameters& Process::get_parameters() const
+{
+  return parameters_;
+}
+
 void Process::init_datas(const std::string& filename_data)
 {
   /*
@@ -390,6 +395,10 @@ void Process::init_parameters(const std::string& filename_parameters)
       parameters_.ratio = std::stod(value);
     else if (param == "time_save")
       parameters_.time_save = std::stod(value);
+    else if (param == "formula")
+      parameters_.formula = std::stoi(value);
+    else if (param == "lambda")
+      parameters_.lambda = std::stod(value);
     else
       std::cerr << "Unknown parameter: " << param << std::endl;
   }
