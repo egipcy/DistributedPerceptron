@@ -2,7 +2,7 @@
 #include <ctime>
 #include <cassert>
 #include "mpi.h"
-
+#include <sstream>
 #include "timeout.hh"
 #include "process.hh"
 #include "matrix/matrix.hh"
@@ -123,6 +123,10 @@ int main(int argc, char** argv)
       else if (p.get_type() == Type::Master)
       {
         p.set_weights_biases(w, b);
+        //std::cout << "Master write the saving file" <<  std::endl;
+        std::stringstream filename;
+        filename << "Save_master_" << p.get_rank();
+        p.save_nn(filename.str());
       }
       else // if (p.get_type() == Type::President)
       {

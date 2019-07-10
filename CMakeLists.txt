@@ -16,6 +16,7 @@ set (SRC
     src/process.cc
     src/matrix/matrix.cc
     src/nn/nn.cc
+    src/timeout.cc
 )
 # Main binary
 
